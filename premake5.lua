@@ -7,4 +7,5 @@ workspace "FryEngine"
         "Release"
     }
     
-include  "FryEngine"
+include "FryEngine"
+include "UT"
