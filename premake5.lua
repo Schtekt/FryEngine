@@ -8,4 +8,3 @@ workspace "FryEngine"
     }
     
 include "FryEngine"
-include "UT"
