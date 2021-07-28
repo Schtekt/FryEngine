@@ -17,7 +17,12 @@ TEST(ECS, ComponentDeletedWithECS)
 {
     ECS* ecs = new ECS();
     int myNumber = 5;
-    Component<DeleteIntClass>* myComponent = ecs->AddComponent<DeleteIntClass>(&myNumber);
+    
+    size_t entHandle = ecs->CreateEntity();
+    Entity* ent = ecs->GetEntity(entHandle);
+    ent->AddComponent<DeleteIntClass>(&myNumber);
+
+    Component<DeleteIntClass>* myComponent = ent->GetComponent<DeleteIntClass>();
 
     ASSERT_EQ(myNumber, myComponent->GetObject().GetNumber());
 

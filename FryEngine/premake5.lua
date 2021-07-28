@@ -6,7 +6,7 @@ project "FryEngine"
    objdir "../Build/bin-int/%{cfg.buildcfg}-%{cfg.architecture}"
 
    files { "src/**.h", "src/**.cpp" }
-
+   defines { "FRY_BUILD_DLL" }
    filter "configurations:Debug"
       defines { "DEBUG" }
       symbols "On"
