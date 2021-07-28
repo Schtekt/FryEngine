@@ -23,8 +23,8 @@ TEST(ECS, ComponentRegisterID)
     Component<DummyClass> compSec("Bye", 10.f);
     Component<float> compNumber(5.f);
 
-    ASSERT_EQ(comp.GetId(), compSec.GetId());
-    ASSERT_NE(comp.GetId(), compNumber.GetId());
+    ASSERT_EQ(comp.sGetID(), compSec.sGetID());
+    ASSERT_NE(comp.sGetID(), compNumber.sGetID());
 };
 
 TEST(ECS, ComponentGetObject)
