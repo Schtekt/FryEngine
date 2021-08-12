@@ -1,17 +1,6 @@
 #include <gtest/gtest.h>
 #include <iostream>
-#include "FryEngine/ECS/ECS.h"
-
-class DeleteIntClass
-{
-public:
-    DeleteIntClass(int* ptr): m_pNumber(ptr) {};
-    DeleteIntClass(const DeleteIntClass& other): m_pNumber(&(*other.m_pNumber)) {};
-    ~DeleteIntClass() { ++*m_pNumber; };
-    int GetNumber() const { return *m_pNumber; };
-private:
-    int* m_pNumber;
-};
+#include "helperClasses.h"
 
 TEST(ECS, RemoveUnownedEntity)
 {
@@ -82,4 +71,9 @@ TEST(ECS, ComponentDeletedFromEntity)
 
     ASSERT_NE(myNumber, 5);
     delete ecs;
+}
+
+TEST(ECS, SingleComponentSystem)
+{
+
 }

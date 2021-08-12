@@ -17,6 +17,7 @@ class Entity
     
     template<typename T>
     T* GetComponent();
+    void* GetComponent(size_t typeId);
 
     private:
     Entity(ECS* parent);

@@ -12,7 +12,7 @@ class ECS
     ~ECS();
     Entity* CreateEntity();
     bool  RemoveEntity(Entity* ent);
-    void  UpdateSystems(std::vector<BaseSystem*>& systems);
+    void  UpdateSystems(long long dt, std::vector<BaseSystem*>& systems);
 
     private:
     template<typename T, typename ...Args>
@@ -22,6 +22,7 @@ class ECS
     bool removeComponent(size_t typeId, size_t compId);
     template<typename T>
     T* getComponent(size_t compIdInList);
+    void* getComponent(size_t typeId, size_t compIdInList);
 
     private:
     std::map<size_t, BaseComponentType*> m_ComponentTypes;
@@ -41,14 +42,13 @@ size_t ECS::addComponent(Entity* entityHandle, Args&& ... args)
         m_ComponentTypes[ComponentType<T>::sId()] = new ComponentType<T>;
     }
 
-    size_t CompListCurrSize = m_Components.size();
+    size_t CompListCurrSize = m_Components[ComponentType<T>::sId()].size();
     m_Components[ComponentType<T>::sId()].resize(CompListCurrSize + ComponentType<T>::sSizeOfComponent());
     new (&m_Components[ComponentType<T>::sId()].at(CompListCurrSize)) T(std::forward<Args>(args)...);
-    int* test (std::forward<Args>(args)...);
 
     m_ComponentParents[ComponentType<T>::sId()].push_back(entityHandle);
 
-    return m_ComponentParents.size() - 1;
+    return m_ComponentParents[ComponentType<T>::sId()].size() - 1;
 }
 
 template<typename T>

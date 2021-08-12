@@ -9,6 +9,7 @@ class ECS
     - size_t addComponent<T, ...Args>(size_t entityId, Args&&... args)
     - bool removeComponent<T>(size_t ComponentId)
     - bool removeComponent(size_t typeId, size_t compId)
+    - T* getComponent<T>(size_t compIdInList)
     - void* getComponent(size_t compTypeId, size_t compIdInList);
     + Entity* CreateEntity()
     + bool RemoveEntity(size_t)
@@ -48,6 +49,7 @@ class Entity
     +bool RemoveComponent<T>()
     bool RemoveComponent(size_t typeId)
     +T* GetComponent<T>()
+    +void* GetComponent(size_t typeId)
     -Entity(ECS* parent)
     -bool setCompId<T>(const size_t id)
     -bool setCompId(const size_t typeId, const size_t id)
@@ -63,7 +65,8 @@ class BaseSystem
 
     - std::vector<size_t> m_ComponentTypes
     - std::vector<CompFlag> m_Flags
-    # addComponentType<T>(CompFlag flag)
+    # addComponentType<T>(const CompFlag flag)
+    # addComponentType(const size_t compTypeId, const CompFlag flag)
 }
 
 enum CompFlag

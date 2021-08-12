@@ -26,6 +26,18 @@ bool Entity::RemoveComponent(size_t typeId)
     return false;
 }
 
+void* Entity::GetComponent(size_t typeId)
+{
+    if(m_Components.count(typeId) == 1)
+    {
+        return (void*)m_pECSParent->getComponent(typeId, m_Components[typeId]);
+    }
+    else
+    {
+        return nullptr;
+    }
+}
+
 bool Entity::setCompId(const size_t compType, const size_t id)
 {
     if(m_Components.count(compType) == 0)
