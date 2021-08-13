@@ -1,16 +1,10 @@
 #include "ECS.h"
 ECS::~ECS()
 {
-
     for (int i = 0; i < m_Entities.size(); i++)
     {
         delete m_Entities[i];
-        m_Entities[i] = nullptr;
     }
-    //for(auto ent : m_Entities)
-    //{
-    //    delete ent;
-    //}
     m_Entities.clear();
 }
 
@@ -36,7 +30,7 @@ bool ECS::RemoveEntity(Entity* ent)
     }
     for (auto compType : compTypes)
     {
-        ent->RemoveComponent(compType);
+        ent->removeComponent(compType);
     }
     return true;
 }
@@ -56,25 +50,25 @@ bool ECS::removeComponent(size_t typeId, size_t compId)
         return false;
     }
 
-    std::vector<char>& ComponentsOfInterest = m_Components[typeId];
+    std::vector<char>& componentsOfInterest = m_Components[typeId];
 
     // Call destructor of the component.
-    void* compToRemove = (void*)&ComponentsOfInterest[toRemoveIndex];
+    void* compToRemove = (void*)&componentsOfInterest[toRemoveIndex];
     m_ComponentTypes[typeId]->CallComponentDestructor(compToRemove);
 
     // Make a switch between the last component of the vector and the now removed component.
-    size_t lastComponentIndex = ComponentsOfInterest.size() - sizeOfComponent;
+    size_t lastComponentIndex = componentsOfInterest.size() - sizeOfComponent;
 
     if(lastComponentIndex != toRemoveIndex)
     {
-        memcpy(&ComponentsOfInterest[toRemoveIndex], &ComponentsOfInterest[lastComponentIndex], sizeOfComponent);
+        memcpy(&componentsOfInterest[toRemoveIndex], &componentsOfInterest[lastComponentIndex], sizeOfComponent);
         
         // Make sure the parent points to the right id after move.
         m_ComponentParents[typeId][lastComponentIndex / sizeOfComponent]->setCompId(typeId, compId);
     }
 
     // Remove references to the now deleted component.
-    ComponentsOfInterest.resize(lastComponentIndex);
+    componentsOfInterest.resize(lastComponentIndex);
     m_ComponentParents[typeId].pop_back();
 
     return true;
@@ -87,17 +81,18 @@ void ECS::UpdateSystems(long long dt, std::vector<BaseSystem*>&systems)
         const std::vector<std::pair<size_t, CompFlag>>& compTypes = system->GetCompTypes();
         
         // If the ECS does not have the required components, skip the system.
-        bool ECSHasComponents = true;
+        bool componentsExistInEcs = true;
         for(auto compType : compTypes)
         {
-            if(m_Components[compType.first].size() == 0 
+            if(m_Components[compType.first].size() == 0
                 && compType.second == CompFlag::Required)
             {
-                ECSHasComponents = false;
+                componentsExistInEcs = false;
+                break;
             }
         }
 
-        if(!ECSHasComponents)
+        if(!componentsExistInEcs)
         {
             continue;
         }
@@ -126,7 +121,7 @@ void ECS::UpdateSystems(long long dt, std::vector<BaseSystem*>&systems)
                 bool sendComponentSetForUpdate = true;
                 for(auto compType = compTypes.begin(); compType != compTypes.end(); compType++)
                 {
-                    void* comp = entityParent->GetComponent(compType->first);
+                    void* comp = entityParent->getComponent(compType->first);
                     if(comp == nullptr && compType->second == CompFlag::Required)
                     {
                         sendComponentSetForUpdate = false;

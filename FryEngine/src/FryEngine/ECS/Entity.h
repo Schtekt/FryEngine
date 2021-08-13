@@ -13,17 +13,17 @@ class Entity
     
     template<typename T>
     bool RemoveComponent();
-    bool RemoveComponent(size_t typeId);
     
     template<typename T>
     T* GetComponent();
-    void* GetComponent(size_t typeId);
 
     private:
     Entity(ECS* parent);
     template<typename T>
     bool setCompId(const size_t id);
     bool setCompId(const size_t type, const size_t id);
+    bool removeComponent(size_t typeId);
+    void* getComponent(size_t typeId);
     inline std::map<size_t, size_t>& getComponents()
     {
         return m_Components;
@@ -47,7 +47,7 @@ T* Entity::AddComponent(Args&&... args)
 template<typename T>
 bool Entity::RemoveComponent()
 {
-    return RemoveComponent(ComponentType<T>::sId());
+    return removeComponent(ComponentType<T>::sId());
 };
 
 template<typename T>

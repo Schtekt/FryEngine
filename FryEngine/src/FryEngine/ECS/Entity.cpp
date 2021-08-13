@@ -4,16 +4,13 @@
 
 Entity::~Entity()
 {
-    if (m_Components.size() > 0)
+    for (auto comp : m_Components)
     {
-        for (auto comp : m_Components)
-        {
-            m_pECSParent->removeComponent(comp.first, comp.second);
-        }
+        m_pECSParent->removeComponent(comp.first, comp.second);
     }
 }
 
-bool Entity::RemoveComponent(size_t typeId)
+bool Entity::removeComponent(size_t typeId)
 {
     if (m_Components.count(typeId) == 1)
     {
@@ -26,7 +23,7 @@ bool Entity::RemoveComponent(size_t typeId)
     return false;
 }
 
-void* Entity::GetComponent(size_t typeId)
+void* Entity::getComponent(size_t typeId)
 {
     if(m_Components.count(typeId) == 1)
     {
