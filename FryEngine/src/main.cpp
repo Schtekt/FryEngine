@@ -3,11 +3,14 @@
 #include <chrono>
 #include <thread>
 #include "FryEngine/Game.h"
+#include "FryEngine/ECS/ECS.h"
 
+// TODO fix linking...
 
 class MyGame : public FryEngine::Game
 {
     private:
+
         void OnUpdate(TimeDuration DT_ms)
         {
             if(GetAsyncKeyState(VK_ESCAPE))

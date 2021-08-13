@@ -1,0 +1,96 @@
+@startuml ECS
+class ECS 
+{
+    - std::vector<char> m_ComponentTypes
+    - std::map<size_t, std::vector<char>> m_Components
+    - std::map<size_t, std::vector<Entity*>> m_ComponentParents
+    - std::vector<Entity*> m_Entities;
+ 
+    - size_t addComponent<T, ...Args>(size_t entityId, Args&&... args)
+    - bool removeComponent<T>(size_t ComponentId)
+    - bool removeComponent(size_t typeId, size_t compId)
+    - T* getComponent<T>(size_t compIdInList)
+    - void* getComponent(size_t compTypeId, size_t compIdInList);
+    + Entity* CreateEntity()
+    + bool RemoveEntity(size_t)
+    + void UpdateSystems(std::vector<BaseSystem*>& systems)
+}
+
+class BaseComponentType 
+{
+    +{abstract}size_t GetId()
+    +{abstract}size_t GetSizeOfComponent()
+    +{abstract}void CallComponentDestructor(void* ptr);
+    # size_t assignId()
+    -{static} size_t m_sIdCount
+}
+
+class ComponentType<T>
+{
+    +ComponentType()
+    +size_t GetId()
+    +size_t GetSizeOfComponent()
+    
+    +{static} size_t Id()
+    +{static} size_t SizeOfComponent()
+
+    +CallComponentDestructor(void* ptr)
+
+    -{static} size_t m_sId
+    -{static} size_t m_sSize
+}
+
+class Entity
+{
+    -std::map<size_t, size_t> m_Components
+    -ECS * m_EcsParent
+
+    +T* AddComponent<T>(Args&&...)
+    +bool RemoveComponent<T>()
+    bool RemoveComponent(size_t typeId)
+    +T* GetComponent<T>()
+    +void* GetComponent(size_t typeId)
+    -Entity(ECS* parent)
+    -bool setCompId<T>(const size_t id)
+    -bool setCompId(const size_t typeId, const size_t id)
+    -std::map<size_t, size_t>& getComponents()
+}
+
+class BaseSystem
+{
+    +BaseSystem(std::vector<size_t> ComponentTypes)
+    +{abstract} void UpdateComponent(float delta, void** Components)
+    + std::vector<size_t> GetComponentTypes()
+    + std::vector<CompFlag> GetComponentFlags()
+
+    - std::vector<size_t> m_ComponentTypes
+    - std::vector<CompFlag> m_Flags
+    # addComponentType<T>(const CompFlag flag)
+    # addComponentType(const size_t compTypeId, const CompFlag flag)
+}
+
+enum CompFlag
+{
+    Required = 0
+    Optional = 1
+}
+
+
+note left of ComponentType
+    Define id and size on class init <size:15><b>NOT</b></size> on object init...
+    size will always be size_t * 2
+end note
+
+
+
+
+ComponentType -|> BaseComponentType
+ECS *- Entity
+ECS <--> Entity : <<Friend>>
+ECS <-- ComponentType : <<Friend>>
+ECS *- ComponentType
+ECS --> BaseSystem
+BaseSystem --> ComponentType
+BaseSystem --> CompFlag
+Entity -> ComponentType
+@enduml

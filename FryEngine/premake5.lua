@@ -1,12 +1,10 @@
 project "FryEngine"
-   kind "ConsoleApp"
+   kind "StaticLib"
    language "C++"
-   cppdialect "C++17"
    targetdir "../Build/bin/%{cfg.buildcfg}-%{cfg.architecture}"
    objdir "../Build/bin-int/%{cfg.buildcfg}-%{cfg.architecture}"
 
    files { "src/**.h", "src/**.cpp" }
-
    filter "configurations:Debug"
       defines { "DEBUG" }
       symbols "On"
@@ -34,7 +32,7 @@ project "Testing"
     language "C++"
     targetdir "../Build/bin/%{cfg.buildcfg}-%{cfg.architecture}"
     objdir "../Build/bin-int/%{cfg.buildcfg}-%{cfg.architecture}"
-    files {"tests/**.cpp", "tests/**.h"}
+    files {"tests/**.cpp", "tests/**.h", "src/**.h"}
     includedirs{"src/", "../googletest/googletest/include"}
     cppdialect "C++17"
     links{"FryEngine", "gTest"}
