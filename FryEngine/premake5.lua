@@ -32,7 +32,7 @@ project "Testing"
     language "C++"
     targetdir "../Build/bin/%{cfg.buildcfg}-%{cfg.architecture}"
     objdir "../Build/bin-int/%{cfg.buildcfg}-%{cfg.architecture}"
-    files {"tests/**.cpp", "tests/**.h", "src/**.h"}
+    files {"tests/**.cpp", "tests/**.h"}
     includedirs{"src/", "../googletest/googletest/include"}
     cppdialect "C++17"
     links{"FryEngine", "gTest"}

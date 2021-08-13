@@ -2,6 +2,12 @@
 #include <iostream>
 #include "helperClasses.h"
 
+TEST(ECS, CreationAndDestruction)
+{
+    ECS* ecs = new ECS();
+    delete ecs;
+}
+
 TEST(ECS, RemoveUnownedEntity)
 {
     ECS* ecs = new ECS();
@@ -13,11 +19,10 @@ TEST(ECS, RemoveUnownedEntity)
 
 TEST(ECS, RemoveEntity)
 {
-    ECS* ecs = new ECS();
-    Entity* ent = ecs->CreateEntity();
+    ECS ecs;
+    Entity* ent = ecs.CreateEntity();
 
-    ASSERT_TRUE(ecs->RemoveEntity(ent));
-    delete ecs;
+    ASSERT_TRUE(ecs.RemoveEntity(ent));
 }
 
 TEST(ECS, ComponentDeletedWithECS)
@@ -53,6 +58,8 @@ TEST(ECS, ComponentDeletedWithEntity)
     ASSERT_NE(myNumber, 5);
     
     delete ecs;
+
+    ASSERT_NE(myNumber, 5);
 }
 
 TEST(ECS, ComponentDeletedFromEntity)
@@ -70,10 +77,8 @@ TEST(ECS, ComponentDeletedFromEntity)
     ent->RemoveComponent<DeleteIntClass>();
 
     ASSERT_NE(myNumber, 5);
+
     delete ecs;
-}
 
-TEST(ECS, SingleComponentSystem)
-{
-
+    ASSERT_NE(myNumber, 5);
 }

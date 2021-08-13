@@ -17,8 +17,6 @@ class ECS
     private:
     template<typename T, typename ...Args>
     size_t addComponent(Entity* entityHandle, Args&& ... args);
-    template<typename T>
-    bool removeComponent(size_t componentId);
     bool removeComponent(size_t typeId, size_t compId);
     template<typename T>
     T* getComponent(size_t compIdInList);
@@ -49,43 +47,6 @@ size_t ECS::addComponent(Entity* entityHandle, Args&& ... args)
     m_ComponentParents[ComponentType<T>::sId()].push_back(entityHandle);
 
     return m_ComponentParents[ComponentType<T>::sId()].size() - 1;
-}
-
-template<typename T>
-bool ECS::removeComponent(size_t componentId)
-{
-    // Validate the id.
-    if(m_Components.count(ComponentType<T>::sId()) == 0)
-    {
-        return false;
-    }
-
-    size_t toRemoveIndex = componentId * ComponentType<T>::sSizeOfComponent();
-
-    if(m_Components[ComponentType<T>::sId()].size() < toRemoveIndex)
-    {
-        return false;
-    }
-
-    // Remove and free the component
-    T* compToRemove = (T*)&m_Components[toRemoveIndex];
-    compToRemove->~T();
-
-    // Move the component in the end of the vector to the now free memory and resize the vector
-    size_t toMoveIndex = (T*)m_Components.size() - ComponentType<T>::sSizeOfComponent();
-    if(toMoveIndex == toRemoveIndex)
-    {
-        m_Components.resize(toMoveIndex);
-        return true;
-    }
-
-    T* compToMove = (T*)&m_Components[toMoveIndex];
-    memcpy(toRemoveIndex, toMoveIndex, ComponentType<T>::sSizeOfComponent());
-
-    m_ComponentParents[ComponentType<T>::sId][componentId]->setCompId<T>(componentId);
-    m_ComponentParents[ComponentType<T>::sId].pop_back();
-
-    return true;
 }
 
 template<typename T>

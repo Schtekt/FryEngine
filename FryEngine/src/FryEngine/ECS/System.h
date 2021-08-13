@@ -9,6 +9,7 @@ class BaseSystem
     BaseSystem() {};
     virtual void UpdateComponents(const long long delta, std::vector<void*>& components) = 0;
     std::vector<std::pair<size_t, CompFlag>>& GetCompTypes();
+
     protected:
     template<typename T>
     void addComponentType(const CompFlag flag = CompFlag::Required);

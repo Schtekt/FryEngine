@@ -2,7 +2,7 @@
 #include <iostream>
 #include "helperClasses.h"
 
-TEST(ECS, customSystemSingleComponent)
+TEST(ECS, CustomSystemSingleComponent)
 {
     ECS* ecs = new ECS();
 
@@ -26,7 +26,7 @@ TEST(ECS, customSystemSingleComponent)
     ASSERT_EQ(myNumber, 5);
 }
 
-TEST(ECS, customSystemSingleComponentType)
+TEST(ECS, CustomSystemSingleComponentType)
 {
     ECS* ecs = new ECS();
 
@@ -69,7 +69,7 @@ TEST(ECS, customSystemSingleComponentType)
     }
 }
 
-TEST(ECS, customSystemMultipleComponentTypes)
+TEST(ECS, CustomSystemMultipleComponentTypes)
 {
     ECS* ecs = new ECS();
 
@@ -113,9 +113,9 @@ TEST(ECS, customSystemMultipleComponentTypes)
     }
 }
 
-TEST(ECS, customSystemMultipleComponentTypesOptional)
+TEST(ECS, CustomSystemMultipleComponentTypesOptional)
 {
-    ECS* ecs = new ECS();
+    ECS ecs;
 
     SubtractionSystem sys;
 
@@ -126,7 +126,7 @@ TEST(ECS, customSystemMultipleComponentTypesOptional)
 
     for(int i = 0; i < 20; i++)
     {
-        entities.push_back(ecs->CreateEntity());
+        entities.push_back(ecs.CreateEntity());
     }
 
     for(int i = 0; i < 20; i++)
@@ -142,7 +142,7 @@ TEST(ECS, customSystemMultipleComponentTypesOptional)
         }
     }
 
-    ecs->UpdateSystems(0, systems);
+    ecs.UpdateSystems(0, systems);
 
     for(int i = 0; i < 20; i++)
     {
@@ -155,12 +155,11 @@ TEST(ECS, customSystemMultipleComponentTypesOptional)
             ASSERT_EQ(*entities[i]->GetComponent<int>(), i);
         }
     }
-    delete ecs;
 }
 
-TEST(ECS, multipleCustomSystems)
+TEST(ECS, MultipleCustomSystems)
 {
-    ECS* ecs = new ECS();
+    ECS ecs;
 
     SubtractionSystem subSys;
     MultiplicationSystem mulSys;
@@ -169,7 +168,7 @@ TEST(ECS, multipleCustomSystems)
     
     for(int i = 0; i < 20; i++)
     {
-        entities.push_back(ecs->CreateEntity());
+        entities.push_back(ecs.CreateEntity());
 
         entities[i]->AddComponent<int>(i);
         entities[i]->AddComponent<unsigned int>(i);
@@ -180,12 +179,10 @@ TEST(ECS, multipleCustomSystems)
     systems.push_back(&mulSys);
     systems.push_back(&subSys);
 
-    ecs->UpdateSystems(0, systems);
+    ecs.UpdateSystems(0, systems);
 
     for(int i = 0; i < 20; i++)
     {
         ASSERT_EQ(*entities[i]->GetComponent<int>(), i * i - i);
     }
-
-    delete ecs;
 }
