@@ -6,6 +6,12 @@ ECS::~ECS()
         delete m_Entities[i];
     }
     m_Entities.clear();
+
+    for (int i = 0; i < m_ComponentTypes.size(); i++)
+    {
+        delete m_ComponentTypes[i];
+    }
+    m_ComponentTypes.clear();
 }
 
 Entity* ECS::CreateEntity()
