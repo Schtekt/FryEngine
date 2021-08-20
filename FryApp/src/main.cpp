@@ -4,16 +4,20 @@
 #include <thread>
 #include "FryEngine/Game.h"
 #include "FryEngine/ECS/ECS.h"
-
-// TODO fix linking...
+#include "FryEngine/Window/Window.h"
 
 class MyGame : public FryEngine::Game
 {
-    private:
+    public:
+        MyGame(): m_win(L"FryTest") {};
+        void OnInit()
+        {
+            m_win.Init();
+        }
 
         void OnUpdate(TimeDuration DT_ms)
         {
-            if(GetAsyncKeyState(VK_ESCAPE))
+            if(GetAsyncKeyState(VK_ESCAPE) || !m_win.ProcessMessage())
             {
                 CloseGame();
             }
@@ -30,8 +34,10 @@ class MyGame : public FryEngine::Game
             // Sleep to appear as working. TO BE REMOVED!
             Sleep(10);
         };
+    private:
     TimeDuration m_currentSecond = 0;
     TimeDuration m_gameRuntime = 0;
+    Window m_win;
 };
 
 
