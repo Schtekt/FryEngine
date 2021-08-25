@@ -34,7 +34,6 @@ project "Testing"
     objdir "../Build/bin-int/%{cfg.buildcfg}-%{cfg.architecture}"
     files {"tests/**.cpp", "tests/**.h"}
     includedirs{"src/", "../googletest/googletest/include"}
-    cppdialect "C++17"
     links{"FryEngine", "gTest"}
 
     filter "configurations:Debug"

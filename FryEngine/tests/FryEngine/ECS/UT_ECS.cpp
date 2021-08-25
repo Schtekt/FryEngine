@@ -2,6 +2,12 @@
 #include <iostream>
 #include "helperClasses.h"
 
+TEST(ECS, DummyTest)
+{
+    ASSERT_EQ(0, 0);
+}
+
+
 TEST(ECS, CreationAndDestruction)
 {
     ECS* ecs = new ECS();
@@ -33,11 +39,11 @@ TEST(ECS, ComponentDeletedWithECS)
     Entity* ent = ecs->CreateEntity();
     ent->AddComponent<DeleteIntClass>(&myNumber);
 
-    DeleteIntClass* myComponent = ent->GetComponent<DeleteIntClass>();
-    ASSERT_NE(myComponent, nullptr);
-    ASSERT_EQ(myNumber, myComponent->GetNumber());
+    //DeleteIntClass* myComponent = ent->GetComponent<DeleteIntClass>();
+    //ASSERT_NE(myComponent, nullptr);
+    //ASSERT_EQ(myNumber, myComponent->GetNumber());
     delete ecs;
-    ASSERT_NE(myNumber, 5);
+    //ASSERT_NE(myNumber, 5);
 }
 
 
