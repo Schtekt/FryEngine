@@ -1,12 +1,11 @@
 #include "Window.h"
 #include <iostream>
-Window::Window(const char* windowDisplayName): m_windowDisplayName(windowDisplayName)
+Window::Window(const char* windowDisplayName, size_t width, size_t height): m_windowDisplayName(windowDisplayName), m_width(width + 20), m_height(height + 43)
 {
 }
 
 Window::~Window()
 {
-    delete m_pPixels;
     Release();
 }
 
@@ -22,15 +21,6 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT msg , WPARAM wparam, LPARAM lparam)
         case WM_DESTROY:
             PostQuitMessage(0);
         break;
-        //case WM_PAINT:
-        //    PAINTSTRUCT ps;
-        //    HDC hdc;
-        //    hdc = BeginPaint(hwnd, &ps);
-
-        //    FillRect(hdc, &ps.rcPaint, (HBRUSH)(0));
-        //    EndPaint(hwnd, &ps);
-        //    std::cout << "PAINTING" << std::endl;
-        //break;
         default:
             return DefWindowProc(hwnd, msg, wparam, lparam);
         break;
@@ -61,8 +51,8 @@ bool Window::Init()
         return false;
     }
 
-    m_windowHandle = CreateWindowExA(WS_EX_OVERLAPPEDWINDOW, "FryWindowClass", m_windowDisplayName.c_str(), WS_OVERLAPPEDWINDOW, 
-    CW_USEDEFAULT, CW_USEDEFAULT, 1080, 720, 
+    m_windowHandle = CreateWindowExA(WS_EX_OVERLAPPEDWINDOW, "FryWindowClass", m_windowDisplayName.c_str(), WS_SYSMENU , 
+    CW_USEDEFAULT, CW_USEDEFAULT, (int)m_width, (int)m_height, 
     NULL, NULL, NULL, NULL);
 
     if(!m_windowHandle)
@@ -77,8 +67,6 @@ bool Window::Init()
     GetClientRect(m_windowHandle, &rect);
     m_width = rect.right - rect.left;
     m_height = rect.bottom - rect.top;
-
-    m_pPixels = new uint32_t[m_width*m_height];
 
     m_bmInfo.bmiHeader.biSize = sizeof(m_bmInfo.bmiHeader);
     m_bmInfo.bmiHeader.biWidth = (LONG)m_width;
@@ -116,46 +104,17 @@ bool Window::ProcessMessage()
     return true;
 }
 
-bool Window::SetPixelColor(size_t x, size_t y, uint32_t color)
+void Window::Render(const RenderTarget& target)
 {
-    if(x < m_width && y < m_height)
-    {
-        ((uint32_t*)m_pPixels)[y*m_width + x] = color;
 
-        return true;
-    }
-    return false;
-}
-
-bool Window::SetPixelColor(size_t x, size_t y, uint8_t red, uint8_t green, uint8_t blue)
-{
-    return SetPixelColor(x, y, (red << 16) | (green << 8) | blue );
-}
-
-void Window::SetColor(uint32_t color)
-{
-    size_t numPixels = m_width * m_height;
-    for(size_t n = 0; n < numPixels; n++)
-    {
-        ((uint32_t*)m_pPixels)[n] = color;
-    }
-}
-
-void Window::SetColor(uint8_t red, uint8_t green, uint8_t blue)
-{
-    SetColor((red << 16) | (green << 8) | blue);
-}
-
-void Window::Render()
-{
     StretchDIBits(m_hdc,
         0, 0,
-        (int)m_width,
-        (int)m_height,
+        (int)target.GetWidth(),
+        (int)target.GetHeight(),
         0, 0,
         (int)m_width,
         (int)m_height,
-        m_pPixels,
+        target.GetPixels(),
         &m_bmInfo,
         DIB_RGB_COLORS,
         SRCCOPY

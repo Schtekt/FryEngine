@@ -1,19 +1,17 @@
+#pragma once
 #include <Windows.h>
 #include <string>
+#include "../Rendering/RenderTarget.h"
 
 class Window
 {
     public:
-    Window(const char* windowDisplayName);
+    Window(const char* windowDisplayName, size_t width, size_t height);
     ~Window();
     bool Init();
     bool Release();
     bool ProcessMessage();
-    bool SetPixelColor(size_t x, size_t y, uint32_t color);
-    bool SetPixelColor(size_t x, size_t y, uint8_t red, uint8_t green, uint8_t blue);
-    void SetColor(uint32_t color);
-    void SetColor(uint8_t red, uint8_t green, uint8_t blue);
-    void Render();
+    void Render(const RenderTarget& target);
     void SetWindowName(std::string& name);
     size_t GetWidth() const;
     size_t GetHeight() const;
@@ -21,7 +19,6 @@ class Window
     private:
     std::string m_windowDisplayName;
     HWND m_windowHandle;
-    void* m_pPixels;
     BITMAPINFO m_bmInfo;
     size_t m_width;
     size_t m_height;

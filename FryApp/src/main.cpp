@@ -2,15 +2,20 @@
 #include <iostream>
 #include <chrono>
 #include <thread>
+#include <crtdbg.h>
 #include "FryEngine/Game.h"
 #include "FryEngine/ECS/ECS.h"
+#include "FryEngine/Rendering/RenderTarget.h"
 #include "FryEngine/Window/Window.h"
-#include <crtdbg.h>
 
 class MyGame : public FryEngine::Game
 {
     public:
-        MyGame(): m_win("FryTest") {};
+        MyGame(): m_win("FryTest", 1080, 720), m_RenderBuffs{{1080, 720}, {1080, 720}}
+        {
+
+        }
+
         void OnInit()
         {
             m_win.Init();
@@ -30,31 +35,26 @@ class MyGame : public FryEngine::Game
 
             if(m_currentSecond > 1000 && DT_ms != 0)
             {
-                //std::cout << "Game has run for " << m_gameRuntime / 1000 << " Seconds!" << std::endl;
+                std::cout << "Game has run for " << m_gameRuntime / 1000 << " Seconds!" << std::endl;
+                std::cout << "FrameRate is: " << 1000 / DT_ms << " frames per second!" << std::endl << std::endl;
                 m_currentSecond = 0;
             }
             
-            // Sleep to appear as working. TO BE REMOVED!
-            Sleep(1);
 
-            //for (int y = 0; y < 720; y++)
-            //{
-            //    for (int x = 0; x < 1080; x++)
-            //    {
-            //        m_win.SetPixelColor(x, y, red, green, blue);
-            //    }
-            //}
-            m_win.SetColor(red, green, blue);
-
-            m_win.Render();
+            m_RenderBuffs[m_buffCount].SetColor(red, green, blue);
+            m_win.Render(m_RenderBuffs[m_buffCount]);
+            m_buffCount = (m_buffCount + 1) % 2;
         };
+
     private:
     TimeDuration m_currentSecond = 0;
     TimeDuration m_gameRuntime = 0;
+    Window m_win;
     uint8_t blue = 0;
     uint8_t green = 255;
     uint8_t red = 0;
-    Window m_win;
+    RenderTarget m_RenderBuffs[2];
+    bool m_buffCount = 0;
 };
 
 
