@@ -5,8 +5,7 @@
 #include <crtdbg.h>
 #include "FryEngine/Game.h"
 #include "FryEngine/ECS/ECS.h"
-#include "FryEngine/Rendering/RenderTarget.h"
-#include "FryEngine/Window/Window.h"
+#include "FryEngine/Rendering/Window.h"
 
 class MyGame : public FryEngine::Game
 {

@@ -1,7 +1,7 @@
 #pragma once
 #include <Windows.h>
 #include <string>
-#include "../Rendering/RenderTarget.h"
+#include "RenderTarget.h"
 
 class Window
 {
