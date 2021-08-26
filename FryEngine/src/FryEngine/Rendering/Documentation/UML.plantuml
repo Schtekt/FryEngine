@@ -3,6 +3,7 @@ class Window
 {
     +Window(const char* windowDisplayName, size_t width, size_t height);
     +~Window();
+    
     +bool Init();
     +bool Release();
     +bool ProcessMessage();
@@ -23,23 +24,29 @@ class Window
 
 class RenderTarget
 {
-    +RenderTarget(size_t width, size_t height);
+    +RenderTarget(unsigned int width, unsigned int height);
     +RenderTarget(const RenderTarget& other);
     +~RenderTarget();
 
-
-    +size_t GetWidth() const;
-    +size_t GetHeight() const;
-    +uint32_t GetColor(size_t x, size_t y) const;
+    +unsigned int GetWidth() const;
+    +unsigned int GetHeight() const;
+    +uint32_t GetColor(unsigned int x, unsigned int y) const;
     +const uint32_t* GetPixels() const;
 
-    +bool SetPixelColor(size_t x, size_t y, uint32_t color);
-    +bool SetPixelColor(size_t x, size_t y, uint8_t red, uint8_t green, uint8_t blue);
+    +bool SetPixelColor(unsigned int x, unsigned int y, uint32_t color);
+    +bool SetPixelColor(unsigned int x, unsigned int y, uint8_t red, uint8_t green, uint8_t blue);
     +void SetColor(uint32_t color);
     +void SetColor(uint8_t red, uint8_t green, uint8_t blue);
 
-    -size_t m_width;
-    -size_t m_height;
+    +void DrawLine(int x1, int y1, int x2, int y2, uint32_t color);
+    +void DrawTri(int x1, int y1, int x2, int y2, int x3, int y3, uint32_t color);
+    +void FillTri(int x1, int y1, int x2, int y2, int x3, int y3, uint32_t color);
+
+    -void drawLineBresenham(unsigned int x1, unsigned int y1, unsigned int x2, unsigned int y2, uint32_t color);
+    -void fillTriInternal(int x1, int y1, int x2, int y2, int x3, int y3, uint32_t color);
+
+    -unsigned int m_width;
+    -unsigned int m_height;
     -uint32_t* m_pPixels;
 }
 

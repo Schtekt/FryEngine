@@ -10,7 +10,7 @@
 class MyGame : public FryEngine::Game
 {
     public:
-        MyGame(): m_win("FryTest", 1080, 720), m_RenderBuffs{{1080, 720}, {1080, 720}}
+        MyGame(): m_win("FryTest", 300, 300), m_RenderBuffs{{300, 300}, {300, 300}}
         {
 
         }
@@ -41,6 +41,11 @@ class MyGame : public FryEngine::Game
             
 
             m_RenderBuffs[m_buffCount].SetColor(red, green, blue);
+            for (int i = 0; i < 30; i++)
+            {
+                m_RenderBuffs[m_buffCount].FillTri(0, 0, 300 / 2, 300, 300, 0, (255 << 16));
+                m_RenderBuffs[m_buffCount].FillTri(300 / 2, 0, 0, 300, 300, 300, 255);
+            }
             m_win.Render(m_RenderBuffs[m_buffCount]);
             m_buffCount = (m_buffCount + 1) % 2;
         };
