@@ -5,13 +5,14 @@
 
 RenderTarget::RenderTarget( unsigned int width, unsigned int height) : m_width(width), m_height(height)
 {
-    m_pPixels = new uint32_t[m_width * m_height];
+    m_pPixels = new uint32_t[(size_t)m_width * m_height];
+    memset(m_pPixels, 0, sizeof(uint32_t) * m_width * m_height);
 }
 
 RenderTarget::RenderTarget(const RenderTarget& other) : m_width(other.m_width), m_height(other.m_height)
 {
-    m_pPixels = new uint32_t[m_width * m_height];
-    memcpy(m_pPixels, other.m_pPixels, m_width * m_height * sizeof(uint32_t));
+    m_pPixels = new uint32_t[(size_t)m_width * m_height];
+    memcpy(m_pPixels, other.m_pPixels, (size_t)m_width * m_height * sizeof(uint32_t));
 }
 
 RenderTarget::~RenderTarget()
@@ -60,7 +61,7 @@ bool RenderTarget::SetPixelColor( unsigned int x, unsigned int y, uint8_t red, u
 
 void RenderTarget::SetColor(uint32_t color)
 {
-    size_t numPixels = m_width * m_height;
+    size_t numPixels = (size_t)m_width * m_height;
     for(size_t n = 0; n < numPixels; ++n)
     {
         m_pPixels[n] = color;
@@ -73,13 +74,7 @@ void RenderTarget::SetColor(uint8_t red, uint8_t green, uint8_t blue)
 }
 
 void RenderTarget::DrawLine( int x1, int y1, int x2, int y2, uint32_t color)
-{
-    // To be changed!
-    x1 = std::max(0, std::min(x1, (int)m_width - 1));
-    x2 = std::max(0, std::min(x2, (int)m_width - 1));
-    y1 = std::max(0, std::min(y1, (int)m_height - 1));
-    y2 = std::max(0, std::min(y2, (int)m_height - 1));
-    
+{   
     drawLineBresenham(x1, y1, x2, y2, color);
 }
 
@@ -92,15 +87,6 @@ void RenderTarget::DrawTri(int x1, int y1, int x2, int y2, int x3, int y3, uint3
 
 void RenderTarget::FillTri(int x1, int y1, int x2, int y2, int x3, int y3, uint32_t color)
 {
-    // To be changed!
-    x1 = std::max(0, std::min(x1, (int)m_width - 1));
-    x2 = std::max(0, std::min(x2, (int)m_width - 1));
-    x3 = std::max(0, std::min(x3, (int)m_width - 1));
-
-    y1 = std::max(0, std::min(y1, (int)m_height - 1));
-    y2 = std::max(0, std::min(y2, (int)m_height - 1));
-    y3 = std::max(0, std::min(y3, (int)m_height - 1));
-
     // Sort the vertices in ascending order
     if (y2 > y1)
     {
@@ -129,8 +115,89 @@ void RenderTarget::FillTri(int x1, int y1, int x2, int y2, int x3, int y3, uint3
     fillTriInternal(x3, y3, x2, y2, x4, y4, color);
 }
 
-void RenderTarget::drawLineBresenham(unsigned int x1, unsigned int y1, unsigned int x2, unsigned int y2, uint32_t color)
+void RenderTarget::drawLineBresenham(int x1, int y1, int x2, int y2, uint32_t color)
 {
+    // Make sure that we stay within the rendertarget.
+    float intersectDeltaLeft;
+    float intersectDeltaTop;
+    
+    float intersectDeltaRight;
+    float intersectDeltaBot;
+    
+    // The line is not paralell to either the x- nor y-axes.
+    if (x1 != x2 && y1 != y2)
+    {
+        intersectDeltaLeft = (float)-x1 / (x2 - x1);
+        intersectDeltaBot = (float)-y1 / (y2 - y1);
+    
+        intersectDeltaRight = (float)(m_width - x1) / (x2 - x1);
+        intersectDeltaTop = (float)(m_height - y1) / (y2 - y1);
+    
+        int xTemp1 = std::min(std::max(x1, (int)(x1 + intersectDeltaLeft * (x2 - x1))), (int)(x1 + intersectDeltaRight * (x2 - x1)));
+        int xTemp2 = std::min(std::max(x2, (int)(x1 + intersectDeltaLeft * (x2 - x1))), (int)(x1 + intersectDeltaRight * (x2 - x1)));
+        int yTemp1 = std::min(std::max(y1, (int)(y1 + intersectDeltaTop * (y2 - y1))), (int)(y1 + intersectDeltaBot * (y2 - y1)));
+        int yTemp2 = std::min(std::max(y2, (int)(y1 + intersectDeltaTop * (y2 - y1))), (int)(y1 + intersectDeltaBot * (y2 - y1)));
+        
+        x1 = xTemp1;
+        x2 = xTemp2;
+        y1 = yTemp1;
+        y2 = yTemp2;
+
+        if (x1 == x2 || y1 == y2)
+        {
+            return;
+        }
+    }
+    // The line is paralell to the y axis.
+    else if (x1 != x2)
+    {
+        if (y1 < 0 || y1 > (int)m_width)
+        {
+            return;
+        }
+
+        intersectDeltaLeft = (float)-x1 / (x2 - x1);
+        intersectDeltaRight = (float)(m_width - x1) / (x2 - x1);
+    
+        int xTemp1 = std::min(std::max(x1, (int)(x1 + intersectDeltaLeft * (x2 - x1))), (int)(x1 + intersectDeltaRight * (x2 - x1)));
+        int xTemp2 = std::min(std::max(x2, (int)(x1 + intersectDeltaLeft * (x2 - x1))), (int)(x1 + intersectDeltaRight * (x2 - x1)));
+        x1 = xTemp1;
+        x2 = xTemp2;
+
+        if (x1 == x2)
+        {
+            return;
+        }
+    }
+    // The line is paralell to the x axis.
+    else if (y1 != y2)
+    {
+        if (x1 < 0 || x1 > (int)m_width)
+        {
+            return;
+        }
+    
+        intersectDeltaBot = (float)-y1 / (y2 - y1);
+        intersectDeltaTop = (float)(m_height - y1) / (y2 - y1);
+    
+        int yTemp1 = std::min(std::max(y1, (int)(y1 + intersectDeltaTop * (y2 - y1))), (int)(y1 + intersectDeltaBot * (y2 - y1)));
+        int yTemp2 = std::min(std::max(y2, (int)(y1 + intersectDeltaTop * (y2 - y1))), (int)(y1 + intersectDeltaBot * (y2 - y1)));
+        y1 = yTemp1;
+        y2 = yTemp2;
+
+        if (y1 == y2)
+        {
+            return;
+        }
+    }
+    else
+    {
+        SetPixelColor(x1, y1, color);
+        return;
+    }
+
+
+    // Perform Breshenhams algorithm!
     bool changed = false;
     int x = x1;
     int y = y1;
@@ -156,11 +223,11 @@ void RenderTarget::drawLineBresenham(unsigned int x1, unsigned int y1, unsigned 
         changed = true;
     }
 
-    float e = 2 * dy - dx;
+    int e = 2 * dy - dx;
 
     for (int i = 1; i <= dx; i++)
     {
-        m_pPixels[y * m_width + x] = color;
+        SetPixelColor(x,y,color);
         while (e >= 0)
         {
             if (changed)
@@ -187,14 +254,14 @@ void RenderTarget::drawLineBresenham(unsigned int x1, unsigned int y1, unsigned 
 
 struct LineInfo
 {
-    int x;
-    int y;
-    int dx;
-    int dy;
+    int x = 0;
+    int y = 0;
+    int dx = 0;
+    int dy = 0;
     int signX = 0;
     int signY = 0;
     bool changed = false;
-    float e;
+    int e = 0;
 };
 
 void SetupLineInfo(LineInfo & lineInfo, int x1, int y1, int x2, int y2)

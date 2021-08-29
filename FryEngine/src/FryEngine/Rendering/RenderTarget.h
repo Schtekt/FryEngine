@@ -24,7 +24,7 @@ class RenderTarget
     void FillTri(int x1, int y1, int x2, int y2, int x3, int y3, uint32_t color);
 
     private:
-    void drawLineBresenham(unsigned int x1, unsigned int y1, unsigned int x2, unsigned int y2, uint32_t color);
+    void drawLineBresenham(int x1, int y1, int x2, int y2, uint32_t color);
     void fillTriInternal(int x1, int y1, int x2, int y2, int x3, int y3, uint32_t color);
 
     private:
