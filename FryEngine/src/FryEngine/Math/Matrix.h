@@ -5,30 +5,29 @@
 template<unsigned int M, unsigned int N>
 struct Matrix
 {
-    double* nums[M * N] = {0};
+    double nums[M * N] = {0};
 
-    Matrix(std::initializer_list<double>& vals);
+
     double GetElement(unsigned int y, unsigned int x) const;
     bool SetElement(unsigned int y, unsigned int x, double val);
 
     Matrix<M, N> operator+(const Matrix<M, N>& other) const;
     Matrix<M, N> operator-(const Matrix<M, N>& other) const;
-    template<unsigned int O>
-    Matrix<M,O> operator*(const Matrix<N, O>& other) const;
+    template<unsigned int P>
+    Matrix<M,P> operator*(const Matrix<N, P>& other) const;
 
     Matrix<M, N>& operator+=(const Matrix<M, N>& other);
     Matrix<M, N>& operator-=(const Matrix<M, N>& other);
+    
+    bool operator==(const Matrix<M,N>& other);
+
+    template<unsigned int P, unsigned int O>
+    bool operator==(const Matrix<P,O>& other);
 
     Matrix<N,M> Transpose();
 
     Vector<N> operator*(const Vector<N>& other) const;
 };
-
-template<unsigned int M, unsigned int N>
-Matrix<M,N>::Matrix(std::initializer_list<double>& vals) : nums(vals)
-{
-
-}
 
 template<unsigned int M, unsigned int N>
 double Matrix<M, N>::GetElement(unsigned int y, unsigned int x) const
@@ -39,7 +38,13 @@ double Matrix<M, N>::GetElement(unsigned int y, unsigned int x) const
 template<unsigned int M, unsigned int N>
 bool Matrix<M, N>::SetElement(unsigned int y, unsigned int x, double val)
 {
+    if(y >= M || x >= N)
+    {
+        return false;
+    }
+
     nums[y * N + x] = val;
+    return true;
 }
 
 template<unsigned int M, unsigned int N>
@@ -68,11 +73,11 @@ Matrix<M, N> Matrix<M,N>::operator-(const Matrix<M, N>& other) const
 }
 
 template<unsigned int M, unsigned int N>
-template<unsigned int O>
-Matrix<M,O> Matrix<M,N>::operator*(const Matrix<N, O>& other) const
+template<unsigned int P>
+Matrix<M,P> Matrix<M,N>::operator*(const Matrix<N, P>& other) const
 {
-    Matrix<M,O> res;
-    for(unsigned int y = 0; y < O; i++)
+    Matrix<M,P> res;
+    for(unsigned int y = 0; y < P; y++)
     {
         for(unsigned int x = 0; x < M; x++)
         {
@@ -80,7 +85,7 @@ Matrix<M,O> Matrix<M,N>::operator*(const Matrix<N, O>& other) const
             
             for(unsigned int k = 0; k < N; k++)
             {
-                res.SetElement(y, x, (res.GetElement(j, i) + GetElement(y,k) * other.GetElement(k,x))); 
+                res.SetElement(y, x, (res.GetElement(y, x) + GetElement(y,k) * other.GetElement(k,x))); 
             }
         }
     }
@@ -95,7 +100,7 @@ Matrix<M, N>& Matrix<M,N>::operator+=(const Matrix<M, N>& other)
     {
         nums[i] = nums[i] + other.nums[i];
     }
-    return this;
+    return *this;
 
 }
 
@@ -107,7 +112,33 @@ Matrix<M, N>& Matrix<M,N>::operator-=(const Matrix<M, N>& other)
     {
         nums[i] = nums[i] - other.nums[i];
     }
-    return this;
+    return *this;
+}
+
+template<unsigned int M, unsigned int N>
+bool Matrix<M,N>::operator==(const Matrix<M,N>& other)
+{
+    unsigned int size = M*N;
+    for(unsigned int i = 0; i < size; i++)
+    {
+        if(nums[i] != other.nums[i])
+        {
+            return false;
+        }
+    }
+    return true;
+}
+
+template<unsigned int M, unsigned int N>
+template<unsigned int P, unsigned int O>
+bool Matrix<M, N>::operator==(const Matrix<P,O>& other)
+{
+    if(P != M || O != N)
+    {
+        return false;
+    }
+    
+    return *this == other;
 }
 
 
@@ -130,11 +161,13 @@ template<unsigned int M, unsigned int N>
 Vector<N> Matrix<M,N>::operator*(const Vector<N>& other) const
 {
     Vector<N> res;
-    for(unsigned int row = 0; row < M; row++)
+    for(unsigned int y = 0; y < N; y++)
     {
-        for(unsigned int col = 0; col < N; col++)
+        res[y] = 0;
+        
+        for(unsigned int x = 0; x < M; x++)
         {
-            res[row] += nums[row * N + col] * nums[col]; 
+            res[y] += GetElement(y,x) * other[x]; 
         }
     }
     return res;

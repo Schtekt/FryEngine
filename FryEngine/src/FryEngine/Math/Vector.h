@@ -24,7 +24,7 @@ struct Vector
 
     bool operator==(const Vector<S>& other) const;
 
-    Vector<3> Cross(const Vector<3>& other);
+    Vector<S> Cross(const Vector<S>& other);
     double Dot(const Vector<S>& other) const;
     double Length() const;
 };
@@ -36,7 +36,7 @@ Vector<S>& Vector<S>::operator=(std::initializer_list<double> const & vals)
     {
         nums[i] = *(vals.begin() + i);
     }
-    return this;
+    return *this;
 }
 
 template<unsigned int S>
@@ -46,7 +46,7 @@ Vector<S>& Vector<S>::operator=(const Vector<S>& other)
     {
         nums[i] = other.nums[i];
     }
-    return this;
+    return *this;
 }
 
 template<unsigned int S>
@@ -158,7 +158,8 @@ bool Vector<S>::operator==(const Vector<S>& other) const
     return true;
 }
 
-Vector<3> Vector<3>::Cross(const Vector<3>& other)
+template<unsigned int S>
+Vector<S> Vector<S>::Cross(const Vector<S>& other)
 {
     Vector<3> res;
     for(int i = 0; i < 3; i++)
