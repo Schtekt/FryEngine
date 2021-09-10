@@ -1,0 +1,55 @@
+@startuml Math
+class Matrix<unsigned int M, unsigned int N>
+{
+    +double nums[M*N]
+
+    +double GetElement(unsigned int y, unsigned int x) const;
+    +bool SetElement(unsigned int y, unsigned int x, double val);
+
+    +Matrix<M, N> operator+(const Matrix<M, N>& other) const;
+    +Matrix<M, N> operator-(const Matrix<M, N>& other) const;
+
+    +Matrix<M,P> operator*(const Matrix<N, P>& other) const;
+
+    +Matrix<M, N>& operator+=(const Matrix<M, N>& other);
+    +Matrix<M, N>& operator-=(const Matrix<M, N>& other);
+    
+    +bool operator==(const Matrix<M,N>& other);
+
+    +bool operator==(const Matrix<P,O>& other);
+
+    +Matrix<N,M> Transpose();
+
+    +Vector<N> operator*(const Vector<N>& other) const;
+}
+
+class Vector<unsigned int N>
+{
+    +double nums[N];
+
+    +Vector<N>& operator=(std::initializer_list<double> const & vals);
+    +Vector<N>& operator=(const Vector<N>& other);
+
+    +double operator[](unsigned int i) const;
+    +double & operator[](unsigned int i);
+
+    +Vector<N> operator+(const Vector<N>& other) const;
+    +Vector<N> operator-(const Vector<N>& other) const;
+    +Vector<N> operator*(double num) const;
+    +Vector<N> operator/(double num) const;
+
+    +Vector<N>& operator+=(const Vector<N>& other);
+    +Vector<N>& operator-=(const Vector<N>& other);
+    +Vector<N>& operator*=(double num);
+    +Vector<N>& operator/=(double num);
+
+    +bool operator==(const Vector<N>& other) const;
+
+    +Vector<N> Cross(const Vector<N>& other);
+    +double Dot(const Vector<N>& other) const;
+    +double Length() const;
+}
+
+Matrix -> Vector
+
+@enduml
