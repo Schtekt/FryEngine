@@ -27,6 +27,8 @@ struct Matrix
     Matrix<N,M> Transpose();
 
     Vector<N> operator*(const Vector<N>& other) const;
+
+    static Matrix<M,N> IdentityMatrix();
 };
 
 template<unsigned int M, unsigned int N>
@@ -168,6 +170,21 @@ Vector<N> Matrix<M,N>::operator*(const Vector<N>& other) const
         for(unsigned int x = 0; x < M; x++)
         {
             res[y] += GetElement(y,x) * other[x]; 
+        }
+    }
+    return res;
+}
+
+template<unsigned int M, unsigned int N>
+Matrix<M,N> Matrix<M,N>::IdentityMatrix()
+{
+    Matrix<M,N> res{0};
+
+    for(int i = 0; i < M*N; i++)
+    {
+        if(i / M == i % N)
+        {
+            res.nums[i] = 1;
         }
     }
     return res;

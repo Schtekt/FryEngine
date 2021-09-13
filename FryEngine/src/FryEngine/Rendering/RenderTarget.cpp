@@ -92,7 +92,6 @@ void RenderTarget::FillTri(int x1, int y1, int x2, int y2, int x3, int y3, uint3
     {
         std::swap(y2, y1);
         std::swap(x2, x1);
-        
     }
 
     if (y3 > y1)
@@ -107,7 +106,18 @@ void RenderTarget::FillTri(int x1, int y1, int x2, int y2, int x3, int y3, uint3
         std::swap(x3, x2);
     }
 
-    // calculate fourth vertice
+    if (y1 == y2 && y1 == y3)
+    {
+        DrawLine(std::min(x1, std::min(x2, x3)), y1, std::max(x1, std::max(x2,x3)), y1, color);
+        return;
+    }
+    else if (y1 == y2)
+    {
+        fillTriInternal(x3, y3, x2, y2, x1, y1, color);
+        return;
+    }
+
+    // calculate fourth vertex
     int x4 = x1 + ((y2 - y1)/(y3 - y1))*(x3 - x1);
     int y4 = y2;
 
@@ -135,8 +145,8 @@ void RenderTarget::drawLineBresenham(int x1, int y1, int x2, int y2, uint32_t co
     
         int xTemp1 = std::min(std::max(x1, (int)(x1 + intersectDeltaLeft * (x2 - x1))), (int)(x1 + intersectDeltaRight * (x2 - x1)));
         int xTemp2 = std::min(std::max(x2, (int)(x1 + intersectDeltaLeft * (x2 - x1))), (int)(x1 + intersectDeltaRight * (x2 - x1)));
-        int yTemp1 = std::min(std::max(y1, (int)(y1 + intersectDeltaTop * (y2 - y1))), (int)(y1 + intersectDeltaBot * (y2 - y1)));
-        int yTemp2 = std::min(std::max(y2, (int)(y1 + intersectDeltaTop * (y2 - y1))), (int)(y1 + intersectDeltaBot * (y2 - y1)));
+        int yTemp1 = std::min(std::max(y1, (int)(y1 + intersectDeltaBot * (y2 - y1))), (int)(y1 + intersectDeltaTop * (y2 - y1)));
+        int yTemp2 = std::min(std::max(y2, (int)(y1 + intersectDeltaBot * (y2 - y1))), (int)(y1 + intersectDeltaTop * (y2 - y1)));
         
         x1 = xTemp1;
         x2 = xTemp2;
@@ -151,12 +161,12 @@ void RenderTarget::drawLineBresenham(int x1, int y1, int x2, int y2, uint32_t co
     // The line is paralell to the y axis.
     else if (x1 != x2)
     {
-        if (y1 < 0 || y1 > (int)m_width)
+        if (y1 < 0 || y1 > (int)m_height)
         {
             return;
         }
 
-        intersectDeltaLeft = (float)-x1 / (x2 - x1);
+        intersectDeltaLeft =  (float)-x1 / (x2 - x1);
         intersectDeltaRight = (float)(m_width - x1) / (x2 - x1);
     
         int xTemp1 = std::min(std::max(x1, (int)(x1 + intersectDeltaLeft * (x2 - x1))), (int)(x1 + intersectDeltaRight * (x2 - x1)));
@@ -176,12 +186,12 @@ void RenderTarget::drawLineBresenham(int x1, int y1, int x2, int y2, uint32_t co
         {
             return;
         }
-    
+
         intersectDeltaBot = (float)-y1 / (y2 - y1);
         intersectDeltaTop = (float)(m_height - y1) / (y2 - y1);
-    
-        int yTemp1 = std::min(std::max(y1, (int)(y1 + intersectDeltaTop * (y2 - y1))), (int)(y1 + intersectDeltaBot * (y2 - y1)));
-        int yTemp2 = std::min(std::max(y2, (int)(y1 + intersectDeltaTop * (y2 - y1))), (int)(y1 + intersectDeltaBot * (y2 - y1)));
+
+        int yTemp1 = std::min(std::max(y1, (int)(y1 + intersectDeltaBot * (y2 - y1))), (int)(y1 + intersectDeltaTop * (y2 - y1)));
+        int yTemp2 = std::min(std::max(y2, (int)(y1 + intersectDeltaBot * (y2 - y1))), (int)(y1 + intersectDeltaTop * (y2 - y1)));
         y1 = yTemp1;
         y2 = yTemp2;
 
@@ -305,6 +315,7 @@ void RenderTarget::fillTriInternal(int x1, int y1, int x2, int y2, int x3, int y
     while (i <= firstLine.dx && j <= secondLine.dx)
     {
         int firstLineY = firstLine.y;
+
         while (firstLineY == firstLine.y)
         {
             while (firstLine.e >= 0 && firstLineY == firstLine.y)

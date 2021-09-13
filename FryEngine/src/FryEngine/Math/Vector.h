@@ -183,5 +183,5 @@ double Vector<S>::Dot(const Vector<S>& other) const
 template<unsigned int S>
 double Vector<S>::Length() const
 {
-    return sqrt(Dot(this));
+    return sqrt(Dot(*this));
 }
