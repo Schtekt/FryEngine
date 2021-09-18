@@ -137,7 +137,7 @@ class MyGame : public FryEngine::Game
             
 
             m_RenderBuffs[m_buffCount].SetColor(red, green, blue);
-            m_Mesh.Draw(m_cam.GetViewMat(), m_cam.GetProjectionMatrix(90, 0.01, 1000), m_RenderBuffs[m_buffCount]);
+            m_Mesh.Draw(m_cam.GetViewMat(), m_cam.GetProjectionMatrix(), m_RenderBuffs[m_buffCount]);
             
             m_win.Render(m_RenderBuffs[m_buffCount]);
             m_buffCount = (m_buffCount + 1) % 2;

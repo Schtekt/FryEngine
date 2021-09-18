@@ -1,25 +1,29 @@
 #include "Camera.h"
 
+Camera::Camera(double viewAngle, double near, double far)
+{
+    float scale = 1 / tan(viewAngle  / 2);
+    m_projMat.SetElement(0, 0, scale);
+    m_projMat.SetElement(0, 0, scale);
+    m_projMat.SetElement(1, 1, scale);
+    m_projMat.SetElement(2, 2, -far / (far - near));
+    m_projMat.SetElement(3, 2, -far * near / (far - near));
+    m_projMat.SetElement(2, 3, -1);
+    m_projMat.SetElement(3, 3, 0);
+}
+
 Matrix<4,4>& Camera::GetViewMat()
 {
     return m_viewMat;
 }
 
-Matrix<4,4> Camera::GetProjectionMatrix(double viewAngle, double near, double far)
+Matrix<4,4>& Camera::GetProjectionMatrix()
 {
-    float scale = 1 / tan(viewAngle  / 2);
-    Matrix<4,4> res;
-    res.SetElement(0, 0, scale);
-    res.SetElement(1, 1, scale);
-    res.SetElement(2, 2, -far / (far - near));
-    res.SetElement(3, 2, -far * near / (far - near));
-    res.SetElement(2, 3, -1);
-    res.SetElement(3, 3, 0);
-    return res;
+    return m_projMat;
 }
 
 // FPS camera
-FPSCamera::FPSCamera(const Vector<3>& pos, double pitch, double yaw)
+FPSCamera::FPSCamera(const Vector<3>& pos, double pitch, double yaw, double viewAngle, double near, double far) : Camera(viewAngle, near, far)
 {
     float cosPitch = cos(pitch);
     float sinPitch = sin(pitch);
@@ -40,7 +44,7 @@ FPSCamera::FPSCamera(const Vector<3>& pos, double pitch, double yaw)
 }
 
 //Look at camera
-LookAtCamera::LookAtCamera(const Vector<3>& pos, Vector<3> target, Vector<3> up)
+LookAtCamera::LookAtCamera(const Vector<3>& pos, Vector<3> target, Vector<3> up, double viewAngle, double near, double far) : Camera(viewAngle, near, far)
 {
     Vector<3> zAxis = (pos - target);
     zAxis /= zAxis.Length(); // normalize
