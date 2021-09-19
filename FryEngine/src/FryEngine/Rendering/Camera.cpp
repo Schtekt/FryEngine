@@ -2,7 +2,7 @@
 
 Camera::Camera(double viewAngle, double near, double far)
 {
-    float scale = 1 / tan(viewAngle  / 2);
+    double scale = 1 / tan(viewAngle  / 2);
     m_projMat.SetElement(0, 0, scale);
     m_projMat.SetElement(0, 0, scale);
     m_projMat.SetElement(1, 1, scale);
@@ -25,10 +25,10 @@ Matrix<4,4>& Camera::GetProjectionMatrix()
 // FPS camera
 FPSCamera::FPSCamera(const Vector<3>& pos, double pitch, double yaw, double viewAngle, double near, double far) : Camera(viewAngle, near, far)
 {
-    float cosPitch = cos(pitch);
-    float sinPitch = sin(pitch);
-    float cosYaw = cos(yaw);
-    float sinYaw = sin(yaw);
+    double cosPitch = cos(pitch);
+    double sinPitch = sin(pitch);
+    double cosYaw = cos(yaw);
+    double sinYaw = sin(yaw);
  
     Vector<3> xAxis = { cosYaw, 0, -sinYaw };
     Vector<3> yAxis = { sinYaw * sinPitch, cosPitch, cosYaw * sinPitch };
