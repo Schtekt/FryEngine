@@ -12,12 +12,12 @@ Camera::Camera(double viewAngle, double near, double far)
     m_projMat.SetElement(3, 3, 0);
 }
 
-Matrix<4,4>& Camera::GetViewMat()
+const Matrix<4,4>& Camera::GetViewMat() const
 {
     return m_viewMat;
 }
 
-Matrix<4,4>& Camera::GetProjectionMatrix()
+const Matrix<4,4>& Camera::GetProjectionMatrix() const
 {
     return m_projMat;
 }

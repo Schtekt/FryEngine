@@ -35,8 +35,11 @@ class Mesh
         void SetVertices(const std::vector<Vertex>& vertices, const std::vector<unsigned int>& vertexIndices);
         void SetModelMatrix(const Matrix<4,4>& mat);
 
+        const std::vector<Vertex>& GetVertices() const;
+        const std::vector<unsigned int>& GetVertexIndices() const;
+        const Matrix<4,4>& GetModelMatrix() const;
     private:
-        void processTris(Vertex triOutput[3], const unsigned int triIndices[3], 
+        bool processTri(Vertex triOutput[3], const unsigned int triIndices[3], 
                         const Matrix<4,4>& viewMat, const Matrix<4,4> perspectiveMat) const;
         void moveAndScaleTriForTarget(Vertex triOuput[3], const Vertex triInput[3], const RenderTarget& target) const;
     private:

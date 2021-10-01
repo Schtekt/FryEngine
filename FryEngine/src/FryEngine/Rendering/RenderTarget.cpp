@@ -118,7 +118,7 @@ void RenderTarget::FillTri(int x1, int y1, int x2, int y2, int x3, int y3, uint3
     }
 
     // calculate fourth vertex
-    int x4 = x1 + ((y2 - y1)/(y3 - y1))*(x3 - x1);
+    int x4 = x1 + (((double)y2 - y1)/((double)y3 - y1))*((double)x3 - x1);
     int y4 = y2;
 
     fillTriInternal(x1, y1, x2, y2, x4, y4, color);
@@ -316,7 +316,7 @@ void RenderTarget::fillTriInternal(int x1, int y1, int x2, int y2, int x3, int y
     {
         int firstLineY = firstLine.y;
 
-        while (firstLineY == firstLine.y)
+        while (firstLineY == firstLine.y && i <= firstLine.dx)
         {
             while (firstLine.e >= 0 && firstLineY == firstLine.y)
             {
@@ -344,7 +344,7 @@ void RenderTarget::fillTriInternal(int x1, int y1, int x2, int y2, int x3, int y
         }
 
         int secondLineY = secondLine.y;
-        while (secondLineY == secondLine.y)
+        while (secondLineY == secondLine.y && j <= secondLine.dx)
         {
             while (secondLine.e >= 0 && secondLineY == secondLine.y)
             {

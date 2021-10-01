@@ -5,8 +5,8 @@ class Camera
 {
     public:
         Camera(double viewAngle, double nearPlaneDistance, double farPlaneDistance);
-        Matrix<4,4>& GetViewMat();
-        Matrix<4,4>& GetProjectionMatrix();
+        const Matrix<4,4>& GetViewMat() const;
+        const Matrix<4,4>& GetProjectionMatrix() const;
     protected:
         Matrix<4,4> m_viewMat;
         Matrix<4,4> m_projMat;
