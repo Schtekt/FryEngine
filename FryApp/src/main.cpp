@@ -7,7 +7,7 @@
 #include "FryEngine/ECS/ECS.h"
 #include "FryEngine/Rendering/Window.h"
 #include "FryEngine/Rendering/Camera.h"
-#include "FryEngine/Rendering/Mesh.h"
+#include "FryEngine/Rendering/TriCollector.h"
 
 class MyGame : public FryEngine::Game
 {
@@ -117,28 +117,31 @@ class MyGame : public FryEngine::Game
                 0, 0, 0, 1
             };
 
+            double rotSpeed = 0.001;
             Matrix<4, 4> rotX
             {
                 1, 0, 0, 0,
-                0, cos(m_gameRuntime * 0.005), sin(m_gameRuntime * 0.005), 0,
-                0, -sin(m_gameRuntime * 0.005), cos(m_gameRuntime * 0.005), 0,
+                0, cos(m_gameRuntime * rotSpeed), sin(m_gameRuntime * rotSpeed), 0,
+                0, -sin(m_gameRuntime * rotSpeed), cos(m_gameRuntime * rotSpeed), 0,
                 0, 0, 0, 1
             };
 
             Matrix<4, 4> rotZ
             {
-                cos(m_gameRuntime * 0.005 / 2), -sin(m_gameRuntime * 0.005 / 2), 0, 0,
-                sin(m_gameRuntime * 0.005 / 2), cos(m_gameRuntime * 0.005 / 2), 0, 0,
+                cos(m_gameRuntime * rotSpeed / 2), -sin(m_gameRuntime * rotSpeed / 2), 0, 0,
+                sin(m_gameRuntime * rotSpeed / 2), cos(m_gameRuntime * rotSpeed / 2), 0, 0,
                 0, 0, 1, 0,
                 0, 0, 0, 1
             };
 
-            m_Mesh.SetModelMatrix(trans * rotX /** rotZ*/);
-            
-
+            m_Mesh.SetModelMatrix(trans * rotX * rotZ);
             m_RenderBuffs[m_buffCount].SetColor(red, green, blue);
-            m_Mesh.Draw(m_cam.GetViewMat(), m_cam.GetProjectionMatrix(), m_RenderBuffs[m_buffCount], E_DrawFlags::FILL | E_DrawFlags::WIREFRAME);
-            
+
+            m_triCollector.SubmitMesh(m_Mesh, &m_cam);
+            m_triCollector.SortTris();
+            m_triCollector.Draw(m_RenderBuffs[m_buffCount]);
+            m_triCollector.Clear();
+
             m_win.Render(m_RenderBuffs[m_buffCount]);
             m_buffCount = (m_buffCount + 1) % 2;
         };
@@ -154,6 +157,7 @@ class MyGame : public FryEngine::Game
     bool m_buffCount = 0;
     FPSCamera m_cam;
     Mesh m_Mesh;
+    TriCollector m_triCollector;
 };
 
 
