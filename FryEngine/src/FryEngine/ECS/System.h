@@ -1,5 +1,7 @@
 #pragma once
 #include <vector>
+#include "ComponentType.h"
+
 enum class CompFlag
 {Required = 0, Optional = 1};
 

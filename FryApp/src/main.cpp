@@ -8,18 +8,20 @@
 #include "FryEngine/Rendering/Window.h"
 #include "FryEngine/Rendering/Camera.h"
 #include "FryEngine/Rendering/TriCollector.h"
+#include "FryEngine/ECS/RenderSystem.h"
 
 class MyGame : public FryEngine::Game
 {
     public:
-        MyGame(): m_win("FryTest", 300, 300), m_RenderBuffs{{300, 300}, {300, 300}}, m_cam({0.0, 0.0, 0.0}, 0.0, 0.0)
+        MyGame(): m_win("FryTest", 300, 300), m_RenderBuffs{{300, 300}, {300, 300}}, m_cam({0.0, 0.0, 0.0}, 0.0, 0.0), m_renderSys(m_cam)
         {
-
+            m_systems.push_back(&m_renderSys);
         }
 
         void OnInit()
         {
             m_win.Init();
+
             std::vector<Vertex> vertices;
             // Box.
             vertices.push_back({-0.5, -0.5, -0.5, 1.0});
@@ -86,8 +88,11 @@ class MyGame : public FryEngine::Game
             vertexIndices.push_back(5);
             vertexIndices.push_back(0);
             vertexIndices.push_back(3);
+            Entity* CubeEnt = m_entities.emplace_back(m_ecs.CreateEntity());
 
-            m_Mesh.SetVertices(vertices, vertexIndices);
+            Mesh* mesh = CubeEnt->AddComponent<Mesh>();
+            mesh->SetVertices(vertices, vertexIndices);
+
         }
 
         void OnUpdate(TimeDuration DT_ms)
@@ -133,17 +138,15 @@ class MyGame : public FryEngine::Game
                 0, 0, 1, 0,
                 0, 0, 0, 1
             };
+            m_entities[0]->GetComponent<Mesh>()->SetModelMatrix(rotX);
 
-            m_Mesh.SetModelMatrix(trans * rotX * rotZ);
-            m_RenderBuffs[m_buffCount].SetColor(red, green, blue);
-
-            m_triCollector.SubmitMesh(m_Mesh, &m_cam);
-            m_triCollector.SortTris();
-            m_triCollector.Draw(m_RenderBuffs[m_buffCount]);
-            m_triCollector.Clear();
-
+            m_ecs.UpdateSystems(DT_ms, m_systems);
+            m_renderSys.Draw(m_RenderBuffs[m_buffCount]);
             m_win.Render(m_RenderBuffs[m_buffCount]);
+
+
             m_buffCount = (m_buffCount + 1) % 2;
+            m_RenderBuffs[m_buffCount].SetColor(red, green, blue);
         };
 
     private:
@@ -156,8 +159,10 @@ class MyGame : public FryEngine::Game
     RenderTarget m_RenderBuffs[2];
     bool m_buffCount = 0;
     FPSCamera m_cam;
-    Mesh m_Mesh;
-    TriCollector m_triCollector;
+    ECS m_ecs;
+    std::vector<Entity*> m_entities;
+    std::vector<BaseSystem*> m_systems;
+    RenderSystem m_renderSys;
 };
 
 
