@@ -144,7 +144,6 @@ class MyGame : public FryEngine::Game
             m_renderSys.Draw(m_RenderBuffs[m_buffCount]);
             m_win.Render(m_RenderBuffs[m_buffCount]);
 
-
             m_buffCount = (m_buffCount + 1) % 2;
             m_RenderBuffs[m_buffCount].SetColor(red, green, blue);
         };
