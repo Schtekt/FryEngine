@@ -161,7 +161,7 @@ bool Vector<S>::operator==(const Vector<S>& other) const
 template<unsigned int S>
 Vector<S> Vector<S>::Cross(const Vector<S>& other)
 {
-    Vector<3> res;
+    Vector<S> res;
     for(int i = 0; i < 3; i++)
     {
         res.nums[i] = nums[(i + 1) % 3] * other.nums[(i + 2) % 3] - nums[(i + 2) % 3] * other.nums[(i + 1) % 3];
@@ -183,5 +183,5 @@ double Vector<S>::Dot(const Vector<S>& other) const
 template<unsigned int S>
 double Vector<S>::Length() const
 {
-    return sqrt(Dot(this));
+    return sqrt(Dot(*this));
 }

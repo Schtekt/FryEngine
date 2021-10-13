@@ -74,6 +74,15 @@ enum CompFlag
     Optional = 1
 }
 
+class RenderSystem
+{
+	+RenderSystem(Camera& pCamera);
+	+void UpdateComponents(const long long delta, std::vector<void*>& components);
+	+void Draw(RenderTarget& target);
+	-TriCollector m_triCollector;
+	-Camera& m_pCamera;
+}
+
 
 note left of ComponentType
     Define id and size on class init <size:15><b>NOT</b></size> on object init...
@@ -92,4 +101,5 @@ ECS --> BaseSystem
 BaseSystem --> ComponentType
 BaseSystem --> CompFlag
 Entity -> ComponentType
+RenderSystem -|> BaseSystem
 @enduml

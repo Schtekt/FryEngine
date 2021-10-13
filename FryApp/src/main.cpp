@@ -6,18 +6,93 @@
 #include "FryEngine/Game.h"
 #include "FryEngine/ECS/ECS.h"
 #include "FryEngine/Rendering/Window.h"
+#include "FryEngine/Rendering/Camera.h"
+#include "FryEngine/Rendering/TriCollector.h"
+#include "FryEngine/ECS/RenderSystem.h"
 
 class MyGame : public FryEngine::Game
 {
     public:
-        MyGame(): m_win("FryTest", 300, 300), m_RenderBuffs{{300, 300}, {300, 300}}
+        MyGame(): m_win("FryTest", 300, 300), m_RenderBuffs{{300, 300}, {300, 300}}, m_cam({0.0, 0.0, 0.0}, 0.0, 0.0), m_renderSys(m_cam)
         {
-
+            m_systems.push_back(&m_renderSys);
         }
 
         void OnInit()
         {
             m_win.Init();
+
+            std::vector<Vertex> vertices;
+            // Box.
+            vertices.push_back({-0.5, -0.5, -0.5, 1.0});
+            vertices.push_back({-0.5, 0.5, -0.5, 1.0});
+            vertices.push_back({0.5,  0.5, -0.5, 1.0});
+            vertices.push_back({0.5, -0.5, -0.5, 1.0});
+            vertices.push_back({0.5,  0.5, 0.5, 1.0});
+            vertices.push_back({0.5, -0.5, 0.5, 1.0});
+            vertices.push_back({-0.5, 0.5, 0.5, 1.0});
+            vertices.push_back({-0.5, -0.5, 0.5, 1.0});
+
+            std::vector<unsigned int> vertexIndices;
+
+            // South
+            vertexIndices.push_back(0);
+            vertexIndices.push_back(1);
+            vertexIndices.push_back(2);
+            
+            vertexIndices.push_back(0);
+            vertexIndices.push_back(2);
+            vertexIndices.push_back(3);
+            
+            // East
+            vertexIndices.push_back(3);
+            vertexIndices.push_back(2);
+            vertexIndices.push_back(4);
+            
+            vertexIndices.push_back(3);
+            vertexIndices.push_back(4);
+            vertexIndices.push_back(5);
+            
+            // North
+            vertexIndices.push_back(5);
+            vertexIndices.push_back(4);
+            vertexIndices.push_back(6);
+            
+            vertexIndices.push_back(5);
+            vertexIndices.push_back(6);
+            vertexIndices.push_back(7);
+            
+            // West
+            vertexIndices.push_back(7);
+            vertexIndices.push_back(6);
+            vertexIndices.push_back(1);
+            
+            vertexIndices.push_back(7);
+            vertexIndices.push_back(1);
+            vertexIndices.push_back(0);
+            
+            // Top
+            vertexIndices.push_back(1);
+            vertexIndices.push_back(6);
+            vertexIndices.push_back(4);
+            
+            vertexIndices.push_back(1);
+            vertexIndices.push_back(4);
+            vertexIndices.push_back(2);
+            
+            // Bottom
+            vertexIndices.push_back(5);
+            vertexIndices.push_back(7);
+            vertexIndices.push_back(0);
+            
+            vertexIndices.push_back(5);
+            vertexIndices.push_back(0);
+            vertexIndices.push_back(3);
+            Entity* CubeEnt = m_entities.emplace_back(m_ecs.CreateEntity());
+
+            Mesh* mesh = CubeEnt->AddComponent<Mesh>();
+            mesh->SetVertices(vertices, vertexIndices);
+
         }
 
         void OnUpdate(TimeDuration DT_ms)
@@ -34,20 +109,43 @@ class MyGame : public FryEngine::Game
 
             if(m_currentSecond > 1000 && DT_ms != 0)
             {
-                std::cout << "Game has run for " << m_gameRuntime / 1000 << " Seconds!" << std::endl;
-                std::cout << "FrameRate is: " << 1000 / DT_ms << " frames per second!" << std::endl << std::endl;
+                //std::cout << "Game has run for " << m_gameRuntime / 1000 << " Seconds!" << std::endl;
+                //std::cout << "FrameRate is: " << 1000 / DT_ms << " frames per second!" << std::endl << std::endl;
                 m_currentSecond = 0;
             }
-            
 
-            m_RenderBuffs[m_buffCount].SetColor(red, green, blue);
-            for (int i = 0; i < 30; i++)
+            Matrix<4, 4> trans
             {
-                m_RenderBuffs[m_buffCount].FillTri(-100, 0, 300 / 2, 300, 400, 0, (255 << 16));
-                m_RenderBuffs[m_buffCount].FillTri(300 / 2, 0, 0, 300, 300, 300, 255);
-            }
+                1, 0, 0, 0,
+                0, 1, 0, 0,
+                0, 0, 1, 0,
+                0, 0, 0, 1
+            };
+
+            double rotSpeed = 0.001;
+            Matrix<4, 4> rotX
+            {
+                1, 0, 0, 0,
+                0, cos(m_gameRuntime * rotSpeed), sin(m_gameRuntime * rotSpeed), 0,
+                0, -sin(m_gameRuntime * rotSpeed), cos(m_gameRuntime * rotSpeed), 0,
+                0, 0, 0, 1
+            };
+
+            Matrix<4, 4> rotZ
+            {
+                cos(m_gameRuntime * rotSpeed / 2), -sin(m_gameRuntime * rotSpeed / 2), 0, 0,
+                sin(m_gameRuntime * rotSpeed / 2), cos(m_gameRuntime * rotSpeed / 2), 0, 0,
+                0, 0, 1, 0,
+                0, 0, 0, 1
+            };
+            m_entities[0]->GetComponent<Mesh>()->SetModelMatrix(rotX);
+
+            m_ecs.UpdateSystems(DT_ms, m_systems);
+            m_renderSys.Draw(m_RenderBuffs[m_buffCount]);
             m_win.Render(m_RenderBuffs[m_buffCount]);
+
             m_buffCount = (m_buffCount + 1) % 2;
+            m_RenderBuffs[m_buffCount].SetColor(red, green, blue);
         };
 
     private:
@@ -55,10 +153,15 @@ class MyGame : public FryEngine::Game
     TimeDuration m_gameRuntime = 0;
     Window m_win;
     uint8_t blue = 0;
-    uint8_t green = 255;
+    uint8_t green = 0;
     uint8_t red = 0;
     RenderTarget m_RenderBuffs[2];
     bool m_buffCount = 0;
+    FPSCamera m_cam;
+    ECS m_ecs;
+    std::vector<Entity*> m_entities;
+    std::vector<BaseSystem*> m_systems;
+    RenderSystem m_renderSys;
 };
 
 

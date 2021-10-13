@@ -50,5 +50,98 @@ class RenderTarget
     -uint32_t* m_pPixels;
 }
 
+class Camera
+{
+    +Camera(double viewAngle, double nearPlaneDistance, double farPlaneDistance);
+    +const Matrix<4,4>& GetViewMat() const;
+    +const Matrix<4,4>& GetProjectionMatrix() const;
+    
+    #Matrix<4,4> m_viewMat;
+    #Matrix<4,4> m_projMat;
+}
+
+class FPSCamera
+{
+    +FPSCamera(const Vector<3>& pos, double pitch, double yaw, 
+                double viewAngle = 3.14159265359 / 2.0, double near = 0.1, double far = 1000);
+}
+
+class LookAtCamera
+{
+    +LookAtCamera(const Vector<3>& pos, Vector<3> target, Vector<3> up,
+                double viewAngle = 3.14159265359 / 2.0, double near = 0.1, double far = 1000);
+}
+
+class Vertex
+{
+    +Vector<4> coords{0};
+}
+
+enum E_DrawFlags
+{
+    +FILL
+    +WIREFRAME
+}
+
+class Mesh
+{
+        +Mesh();
+        +Mesh(const std::vector<Vertex>& m_vertices, const std::vector<unsigned int>& m_vertexIndices);
+        +void Draw(const Matrix<4,4>& View, const Matrix<4,4>& perspective, RenderTarget& target, E_DrawFlags flag = E_DrawFlags::FILL) const;
+        +void SetVertices(const std::vector<Vertex>& vertices, const std::vector<unsigned int>& vertexIndices);
+        +void SetModelMatrix(const Matrix<4,4>& mat);
+
+        +const std::vector<Vertex>& GetVertices() const; 
+        +const std::vector<unsigned int>& GetVertexIndices() const; 
+        +const Matrix<4,4>& GetModelMatrix() const; 
+        
+        -bool processTri(Vertex triOutput[3], const unsigned int triIndices[3], 
+                        const Matrix<4,4>& viewMat, const Matrix<4,4> perspectiveMat) const;
+        -void moveAndScaleTriForTarget(Vertex triOuput[3], const Vertex triInput[3], const RenderTarget& target) const;
+
+        -std::vector<Vertex> m_vertices;
+        -std::vector<unsigned int> m_vertexIndices;
+        -Matrix<4,4> m_ModelMat = Matrix<4,4>::IdentityMatrix();
+}
+
+package Math <<Folder>>
+{
+    class Matrix <M,N>
+}
+
+class Triangle
+{
+    +Triangle(){};
+    +Triangle(Vertex v1, Vertex v2, Vertex v3)
+
+    +Vertex p1;
+    +Vertex p2;
+    +Vertex p3;
+}
+
+class TriCollector
+{
+    +TriCollector();
+    +void SubmitMesh(const Mesh& mesh, const Camera* cam);
+    +void SortTris();
+    +void Draw(RenderTarget& target);
+    +void Clear();
+
+    -std::vector<Triangle> m_tris;
+}
+
+Camera <|-- FPSCamera
+Camera <|-- LookAtCamera
+Mesh --> Camera
+Mesh --> RenderTarget
+Mesh o-- Vertex
+Mesh --> E_DrawFlags
 Window --> RenderTarget
+Camera --> Matrix
+Mesh --> Matrix
+TriCollector --> Mesh
+TriCollector --> Camera
+TriCollector --> RenderTarget
+TriCollector --> Triangle
+
 @enduml
