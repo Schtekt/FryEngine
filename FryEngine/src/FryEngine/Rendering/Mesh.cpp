@@ -149,3 +149,19 @@ void Mesh::moveAndScaleTriForTarget(Vertex triOutput[3], const Vertex triInput[3
         triOutput[2].coords[0] = triOutput[2].coords[0] * 0.5 * target.GetWidth();
         triOutput[2].coords[1] = triOutput[2].coords[1] * 0.5 * target.GetHeight();
 }
+
+void Mesh::ReadFromObj(const std::string& path)
+{
+    // Open file (in read mode)
+
+    // Read the file "Line by Line" and handle v tags and f tags (assuming they are each formatted the following way: "v <float> <float> <float>" and "f <int> <int> <int>)
+    
+    //float x, y, z;
+    //m_vertices.push_back({ x,y,z, 1.0 });
+    
+    //int index;
+    //m_vertexIndices.push_back(index);
+
+    // save all vertices (v) to a std::vector (or rather the member variable m_vertices)
+    // save all the vertex indices (f) to a std::vector (or rather the member variable m_vertexIndices)
+}

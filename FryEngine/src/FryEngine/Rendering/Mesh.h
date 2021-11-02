@@ -34,6 +34,7 @@ class Mesh
         void Draw(const Matrix<4,4>& View, const Matrix<4,4>& perspective, RenderTarget& target, E_DrawFlags flag = E_DrawFlags::FILL) const;
         void SetVertices(const std::vector<Vertex>& vertices, const std::vector<unsigned int>& vertexIndices);
         void SetModelMatrix(const Matrix<4,4>& mat);
+        void ReadFromObj(const std::string& path);
 
         const std::vector<Vertex>& GetVertices() const;
         const std::vector<unsigned int>& GetVertexIndices() const;
