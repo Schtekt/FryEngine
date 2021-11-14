@@ -87,42 +87,25 @@ void RenderTarget::DrawTri(int x1, int y1, int x2, int y2, int x3, int y3, uint3
 
 void RenderTarget::FillTri(int x1, int y1, int x2, int y2, int x3, int y3, uint32_t color)
 {
-    // Sort the vertices in ascending order
-    if (y2 > y1)
+    if(y1 > y3)
     {
-        std::swap(y2, y1);
-        std::swap(x2, x1);
+        std::swap(y1, y3);
+        std::swap(x1, x3);
     }
 
-    if (y3 > y1)
+    if(y1 > y2)
     {
-        std::swap(y3, y1);
-        std::swap(x3, x1);
+        std::swap(y1, y2);
+        std::swap(x1, x2);
     }
 
-    if (y3 > y2)
+    if(y2 > y3)
     {
-        std::swap(y3, y2);
-        std::swap(x3, x2);
+        std::swap(y2, y3);
+        std::swap(x2, x3);
     }
-
-    if (y1 == y2 && y1 == y3)
-    {
-        DrawLine(std::min(x1, std::min(x2, x3)), y1, std::max(x1, std::max(x2,x3)), y1, color);
-        return;
-    }
-    else if (y1 == y2)
-    {
-        fillTriInternal(x3, y3, x2, y2, x1, y1, color);
-        return;
-    }
-
-    // calculate fourth vertex
-    int x4 = x1 + (((double)y2 - y1)/((double)y3 - y1))*((double)x3 - x1);
-    int y4 = y2;
-
-    fillTriInternal(x1, y1, x2, y2, x4, y4, color);
-    fillTriInternal(x3, y3, x2, y2, x4, y4, color);
+    
+    fillTriInternal(x1,y1,x2,y2,x3,y3,color);
 }
 
 void RenderTarget::drawLineBresenham(int x1, int y1, int x2, int y2, uint32_t color)
@@ -303,74 +286,81 @@ void SetupLineInfo(LineInfo & lineInfo, int x1, int y1, int x2, int y2)
 
 void RenderTarget::fillTriInternal(int x1, int y1, int x2, int y2, int x3, int y3, uint32_t color)
 {
-    LineInfo firstLine;
-    LineInfo secondLine;
+    // Assume points are sorted such that y1 <= y2 <= y3
 
-    SetupLineInfo(firstLine, x1, y1, x2, y2);
-    SetupLineInfo(secondLine, x1, y1, x3, y3);
+    int dx1 = x2 - x1;
+    int dx2 = x3 - x1;
+    int dy1 = y2 - y1;
+    int dy2 = y3 - y1;
 
-    int i = 1;
-    int j = 1;
+    int ax, bx;
 
-    while (i <= firstLine.dx && j <= secondLine.dx)
+    float axStep = 0;
+    float bxStep = 0;
+
+    if (dy1)
     {
-        int firstLineY = firstLine.y;
+        axStep = (float)dx1 / dy1;
+    }
+    if (dy2)
+    {
+        bxStep = (float)dx2 / dy2;
+    }
 
-        while (firstLineY == firstLine.y && i <= firstLine.dx)
+    // limit y values
+    unsigned int yLow = std::min(std::max(0, y1), (int)m_height);
+    unsigned int yHigh = std::min(std::max(0, y2), (int)m_height);
+
+    for (int y = yLow; y < yHigh; y++)
+    {
+        ax = x1 + axStep * (y - y1);
+        bx = x1 + bxStep * (y - y1);
+
+        ax = std::min(std::max(0, ax), (int)m_width);
+        bx = std::min(std::max(0, bx), (int)m_width);
+        if (ax > bx)
+            std::swap(ax, bx);
+
+        for (int x = ax; x < bx; x++)
         {
-            while (firstLine.e >= 0 && firstLineY == firstLine.y)
-            {
-                if (firstLine.changed)
-                {
-                    firstLine.x += firstLine.signX;
-                }
-                else
-                {
-                    firstLine.y += firstLine.signY;
-                }
-                firstLine.e -= 2 * firstLine.dx;
-            }
-
-            if (firstLine.changed)
-            {
-                firstLine.y += firstLine.signY;
-            }
-            else
-            {
-                firstLine.x += firstLine.signX;
-            }
-            firstLine.e += 2 * firstLine.dy;
-            ++i;
+            SetPixelColor(x, y, color);
         }
+    }
 
-        int secondLineY = secondLine.y;
-        while (secondLineY == secondLine.y && j <= secondLine.dx)
+    dx1 = x1 - x3;
+    dx2 = x2 - x3;
+    dy1 = y1 - y3;
+    dy2 = y2 - y3;
+
+    axStep = 0;
+    bxStep = 0;
+
+    if (dy1)
+    {
+        axStep = (float)dx1 / dy1;
+    }
+    if (dy2)
+    {
+        bxStep = (float)dx2 / dy2;
+    }
+
+    yLow = std::min(std::max(0, y2), (int)m_height);
+    yHigh = std::min(std::max(0, y3), (int)m_height);
+
+    for (int y = yLow; y <= yHigh; y++)
+    {
+        ax = x3 + axStep * (y - y3);
+        bx = x3 + bxStep * (y - y3);
+
+        ax = std::min(std::max(0, ax), (int)m_width);
+        bx = std::min(std::max(0, bx), (int)m_width);
+
+        if (ax > bx)
+            std::swap(ax, bx);
+
+        for (int x = ax; x < bx; x++)
         {
-            while (secondLine.e >= 0 && secondLineY == secondLine.y)
-            {
-                if (secondLine.changed)
-                {
-                    secondLine.x += secondLine.signX;
-                }
-                else
-                {
-                    secondLine.y += secondLine.signY;
-                }
-                secondLine.e -= 2 * secondLine.dx;
-            }
-
-            if (secondLine.changed)
-            {
-                secondLine.y += secondLine.signY;
-            }
-            else
-            {
-                secondLine.x += secondLine.signX;
-            }
-            secondLine.e += 2 * secondLine.dy;
-            ++j;
+            SetPixelColor(x, y, color);
         }
-
-        DrawLine(firstLine.x, firstLine.y, secondLine.x, secondLine.y, color);
     }
 }

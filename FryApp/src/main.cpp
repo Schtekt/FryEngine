@@ -138,7 +138,7 @@ class MyGame : public FryEngine::Game
                 0, 0, 1, 0,
                 0, 0, 0, 1
             };
-            m_entities[0]->GetComponent<Mesh>()->SetModelMatrix(rotX);
+            m_entities[0]->GetComponent<Mesh>()->SetModelMatrix(rotZ * rotX);
 
             m_ecs.UpdateSystems(DT_ms, m_systems);
             m_renderSys.Draw(m_RenderBuffs[m_buffCount]);
