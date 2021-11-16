@@ -1,6 +1,7 @@
 #pragma once
 #include "../Math/Matrix.h"
 #include <vector>
+#include <string>
 
 class RenderTarget;
 
