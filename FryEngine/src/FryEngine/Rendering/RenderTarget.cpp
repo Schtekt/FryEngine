@@ -364,3 +364,134 @@ void RenderTarget::fillTriInternal(int x1, int y1, int x2, int y2, int x3, int y
         }
     }
 }
+
+void RenderTarget::textureTriInternal(int x1, int y1, int u1, int v1, 
+                                      int x2, int y2, int u2, int v2, 
+                                      int x3, int y3, int u3, int v3, 
+                                      unsigned char* image, unsigned int imageWidth, unsigned int imageHeight)
+{
+    // Assume points are sorted such that y1 <= y2 <= y3
+
+    int dx1 = x2 - x1;
+    int dx2 = x3 - x1;
+    int dy1 = y2 - y1;
+    int dy2 = y3 - y1;
+    int du1 = u2 - u1;
+    int du2 = u3 - u1;
+    int dv1 = u2 - u1;
+    int dv2 = u3 - u1;
+
+    int ax, bx;
+
+    float invertedDy1 = 0;
+    float invertedDy2 = 0;
+
+    if (dy1)
+    {
+        invertedDy1 = 1.f / dy1;
+    }
+    if (dy2)
+    {
+        invertedDy2 = 1.f / dy2;
+    }
+
+    // limit y values
+    unsigned int yLow = std::min(std::max(0, y1), (int)m_height);
+    unsigned int yHigh = std::min(std::max(0, y2), (int)m_height);
+
+    for (int y = yLow; y < yHigh; y++)
+    {
+        float t1 = (y - y1) * invertedDy1;
+        float t2 = (y - y1) * invertedDy2;
+
+        ax = x1 + dx1 * t1;
+        bx = x1 + dx2 * t2;
+        
+        float startU = u1 + du1 * t1;
+        float startV = v1 + dv1 * t1;
+        float endU = u1 + du2 * t2;
+        float endV = v1 + dv2 * t2;
+
+
+        if (ax > bx)
+        {
+            std::swap(ax, bx);
+            std::swap(startU, endU);
+            std::swap(startV, endV);
+        }
+
+        int limitedAx = std::min(std::max(0, ax), (int)m_width);
+        int limitedBx = std::min(std::max(0, bx), (int)m_width);
+        float t_step = 1.0f / (float)(bx - ax);
+        float t = (limitedAx - ax) * t_step;
+
+        float tex_u, tex_v;
+        for (int x = limitedAx; x < limitedBx; x++)
+        {
+            tex_u = startU + t * endU;
+            tex_v = startV + t * endV;
+            unsigned char color = image[(int)tex_u + (int)tex_v * imageHeight];
+            SetPixelColor(x, y, color);
+            t += t_step;
+        }
+    }
+
+    dx1 = x1 - x3;
+    dx2 = x2 - x3;
+    dy1 = y1 - y3;
+    dy2 = y2 - y3;
+
+    invertedDy1 = 0;
+    invertedDy2 = 0;
+
+    if (dy1)
+    {
+        invertedDy1 = 1.f / dy1;
+    }
+    if (dy2)
+    {
+        invertedDy2 = 1.f / dy2;
+    }
+
+    yLow = std::min(std::max(0, y2), (int)m_height);
+    yHigh = std::min(std::max(0, y3), (int)m_height);
+
+    for (int y = yLow; y <= yHigh; y++)
+    {
+        float t1 = (y - y3) * invertedDy1;
+        float t2 = (y - y3) * invertedDy2;
+
+        ax = x3 + dx1 * t1;
+        bx = x3 + dx2 * t2;
+
+        ax = std::min(std::max(0, ax), (int)m_width);
+        bx = std::min(std::max(0, bx), (int)m_width);
+
+        float startU = u1 + du1 * t1;
+        float startV = v1 + dv1 * t1;
+        float endU = u1 + du2 * t2;
+        float endV = v1 + dv2 * t2;
+
+        if (ax > bx)
+        {
+            std::swap(ax, bx);
+            std::swap(startU, endU);
+            std::swap(startV, endV);
+        }
+
+        int limitedAx = std::min(std::max(0, ax), (int)m_width);
+        int limitedBx = std::min(std::max(0, bx), (int)m_width);
+        float t_step = 1.0f / (float)(bx - ax);
+        float t = (limitedAx - ax) * t_step;
+
+        float tex_u, tex_v;
+        for (int x = limitedAx; x < limitedBx; x++)
+        {
+            tex_u = startU + t * endU;
+            tex_v = startV + t * endV;
+            unsigned char color = image[(int)tex_u + (int)tex_v * imageHeight];
+            SetPixelColor(x, y, color);
+            t += t_step;
+        }
+    }
+}
