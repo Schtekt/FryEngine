@@ -24,7 +24,18 @@ inline E_DrawFlags& operator |= (E_DrawFlags& lhs, E_DrawFlags rhs)
 
 struct Vertex
 {
-    Vector<4> coords{0};
+    Vector<4> coords{0,0,0,1};
+};
+
+struct UVCoord
+{
+    float u;
+    float v;
+};
+
+struct Normal
+{
+    Vector<4> coords{0,0,0,0};
 };
 
 class Mesh
@@ -46,6 +57,10 @@ class Mesh
         void moveAndScaleTriForTarget(Vertex triOuput[3], const Vertex triInput[3], const RenderTarget& target) const;
     private:
         std::vector<Vertex> m_vertices;
+        std::vector<UVCoord> m_uvCoords;
+        std::vector<Normal> m_normals;
         std::vector<unsigned int> m_vertexIndices;
+        std::vector<unsigned int> m_uvIndices;
+        std::vector<unsigned int> m_normalIndices;
         Matrix<4,4> m_ModelMat = Matrix<4,4>::IdentityMatrix();
 };

@@ -170,7 +170,7 @@ void Mesh::ReadFromObj(const std::string& path)
             if (command == 'v')
             {
                 ss >> x >> y >> z;
-                m_vertices.push_back({ x,y,z, 1.0 });
+                m_vertices.push_back({ x,y,z});
             }
             if (command == 'f')
             {
