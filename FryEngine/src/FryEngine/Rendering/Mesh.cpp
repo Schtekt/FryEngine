@@ -157,9 +157,12 @@ void Mesh::ReadFromObj(const std::string& path)
     std::ifstream myfile(path);
     std::string line;
     char command;
+    char commandTwo;
     float x;
     float y;
     float z;
+    float u;
+    float v;
     unsigned int i;
     if (myfile.is_open())
     {
@@ -169,17 +172,67 @@ void Mesh::ReadFromObj(const std::string& path)
             ss >> command;
             if (command == 'v')
             {
-                ss >> x >> y >> z;
-                m_vertices.push_back({ x,y,z});
+                ss >> commandTwo;
+                if (commandTwo == 't')
+                {
+                    ss >> u >> v;
+                    m_uvCoords.push_back({u,v});
+                }
+                else if (commandTwo == 'n')
+                {
+                    ss >> x >> y >> z;
+                    m_normals.push_back({ x,y,z });
+                }
+                else 
+                { 
+                    ss.unget();
+                    ss >> x >> y >> z;
+                    m_vertices.push_back({x,y,z});
+                }
             }
             if (command == 'f')
             {
-                ss >> i;
-                m_vertexIndices.push_back(i-1);
-                ss >> i;
-                m_vertexIndices.push_back(i-1);
-                ss >> i;
-                m_vertexIndices.push_back(i-1);
+                for (int index = 0; index < 3; index++)
+                {
+                    ss >> i;
+                    m_vertexIndices.push_back(i - 1);
+                    ss >> commandTwo;
+
+                    if (commandTwo == '/')
+                    {
+                        size_t streamPos;
+                        streamPos = ss.tellg();
+                        ss >> i;
+
+                        if (ss.rdstate() != std::ios_base::badbit)
+                        {
+                            m_uvIndices.push_back(i - 1);
+                        }
+                        else
+                        {
+                            ss.seekg(streamPos);
+                            ss.clear();
+                        }
+
+                        // Resetting commandTwo because otherwise it'll still remain as '/' even if nothing is read from ss.
+                        commandTwo = 0;
+                        ss >> commandTwo;
+
+                        if (commandTwo == '/')
+                        {
+                            ss >> i;
+                            m_normalIndices.push_back(i - 1);
+                        }
+                        else
+                        {
+                            ss.unget();
+                        }
+                    }
+                    else
+                    {
+                        ss.unget();
+                    }
+                }
             }
             command = 0;
         }
