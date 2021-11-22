@@ -1,7 +1,7 @@
 # Exported from 3D Builder
-mtllib Cube.mtl
+# mtllib Cube.mtl
 
-o Object.1
+# o Object.1
 v -0.500000 -0.500000 0.500000
 v 0.500000 -0.500000 0.500000
 v -0.500000 0.500000 0.500000
@@ -11,7 +11,7 @@ v -0.500000 0.500000 -0.500000
 v 0.500000 -0.500000 -0.500000
 v 0.500000 0.500000 0.500000
 
-usemtl Green_0
+# usemtl Green_0
 f 1 2 3
 f 4 5 6
 f 5 4 7

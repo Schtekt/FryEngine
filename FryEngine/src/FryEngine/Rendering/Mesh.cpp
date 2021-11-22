@@ -163,7 +163,14 @@ void Mesh::ReadFromObj(const std::string& path)
     float z;
     float u;
     float v;
+    bool isFileFormatCorrect = true;
     unsigned int i;
+    std::vector<Vertex> tmpVertices;
+    std::vector<UVCoord> tmpUvCoords;
+    std::vector<Normal> tmpNormals;
+    std::vector<unsigned int> tmpVertexIndices;
+    std::vector<unsigned int> tmpUvIndices;
+    std::vector<unsigned int> tmpNormalIndices;
     if (myfile.is_open())
     {
         while (std::getline(myfile, line))
@@ -176,26 +183,26 @@ void Mesh::ReadFromObj(const std::string& path)
                 if (commandTwo == 't')
                 {
                     ss >> u >> v;
-                    m_uvCoords.push_back({u,v});
+                    tmpUvCoords.push_back({ u,v });
                 }
                 else if (commandTwo == 'n')
                 {
                     ss >> x >> y >> z;
-                    m_normals.push_back({ x,y,z });
+                    tmpNormals.push_back({ x,y,z });
                 }
                 else 
                 { 
                     ss.unget();
                     ss >> x >> y >> z;
-                    m_vertices.push_back({x,y,z});
+                    tmpVertices.push_back({ x,y,z });
                 }
             }
-            if (command == 'f')
+            else if (command == 'f')
             {
                 for (int index = 0; index < 3; index++)
                 {
                     ss >> i;
-                    m_vertexIndices.push_back(i - 1);
+                    tmpVertexIndices.push_back(i - 1);
                     ss >> commandTwo;
 
                     if (commandTwo == '/')
@@ -204,9 +211,9 @@ void Mesh::ReadFromObj(const std::string& path)
                         streamPos = ss.tellg();
                         ss >> i;
 
-                        if (ss.rdstate() != std::ios_base::badbit)
+                        if (ss.rdstate() != std::ios_base::badbit && i != 0)
                         {
-                            m_uvIndices.push_back(i - 1);
+                            tmpUvIndices.push_back(i - 1);
                         }
                         else
                         {
@@ -221,20 +228,49 @@ void Mesh::ReadFromObj(const std::string& path)
                         if (commandTwo == '/')
                         {
                             ss >> i;
-                            m_normalIndices.push_back(i - 1);
+                            tmpNormalIndices.push_back(i - 1);
                         }
                         else
                         {
                             ss.unget();
+                            ss.clear();
                         }
                     }
                     else
                     {
                         ss.unget();
+                        ss.clear();
                     }
                 }
             }
+            else if (command == '#' || command == 0)
+            {
+                // If '#' or '/0' is encountered the file continues to run.
+            }
+            else 
+            {
+                isFileFormatCorrect = false;
+                break;
+            }
+            if (ss.rdstate() == std::ios_base::badbit || ss.rdstate() == std::ios_base::failbit)
+            {
+                isFileFormatCorrect = false;
+                break;
+            }
             command = 0;
+        }
+        if (isFileFormatCorrect)
+        {
+            m_vertices = tmpVertices;
+            m_uvCoords = tmpUvCoords;
+            m_normals = tmpNormals;
+            m_vertexIndices = tmpVertexIndices;
+            m_uvIndices = tmpUvIndices;
+            m_normalIndices = tmpNormalIndices;
+        }
+        else
+        {
+            std::cout << "File could not be read" << std::endl;
         }
         myfile.close();
     }
