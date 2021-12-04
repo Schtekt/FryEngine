@@ -98,9 +98,9 @@ class MyGame : public FryEngine::Game
 
         void OnUpdate(TimeDuration DT_ms)
         {
-            m_keyboardState.UpdateKeyboard(DT_ms);
+            //m_keyboardState.UpdateKeyboard(DT_ms);
 
-            if(m_keyboardState.GetKeyState(VK_ESCAPE) || !m_win.ProcessMessage())
+            if(m_win.GetKeyboard().GetKeyState(VK_ESCAPE) || !m_win.ProcessMessage())
             {
                 CloseGame();
             }
@@ -165,7 +165,6 @@ class MyGame : public FryEngine::Game
     std::vector<Entity*> m_entities;
     std::vector<BaseSystem*> m_systems;
     RenderSystem m_renderSys;
-    KeyboardState m_keyboardState;
 };
 
 

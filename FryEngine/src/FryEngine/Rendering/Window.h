@@ -2,10 +2,12 @@
 #include <Windows.h>
 #include <string>
 #include "RenderTarget.h"
+#include "../Input/KeyboardState.h"
+#include "../Input/MouseState.h"
 
 class Window
 {
-    public:
+public:
     Window(const char* windowDisplayName, size_t width, size_t height);
     ~Window();
     
@@ -19,11 +21,20 @@ class Window
     size_t GetWidth() const;
     size_t GetHeight() const;
 
-    private:
+    KeyboardState& GetKeyboard();
+    MouseState& GetMouseState();
+
+private:
+    void updateKey(const MSG& msg);
+    void updateMouse(const MSG& msg);
+
+private:
     std::string m_windowDisplayName;
     HWND m_windowHandle;
     BITMAPINFO m_bmInfo;
     size_t m_width;
     size_t m_height;
     HDC m_hdc;
+    KeyboardState m_keyboardState;
+    MouseState m_mouseState;
 };
