@@ -47,6 +47,7 @@ class Mesh
         void SetVertices(const std::vector<Vertex>& vertices, const std::vector<unsigned int>& vertexIndices);
         void SetModelMatrix(const Matrix<4,4>& mat);
         void ReadFromObj(const std::string& path);
+        void ReadFromMTL(const std::string& path);
 
         const std::vector<Vertex>& GetVertices() const;
         const std::vector<unsigned int>& GetVertexIndices() const;
@@ -63,4 +64,16 @@ class Mesh
         std::vector<unsigned int> m_uvIndices;
         std::vector<unsigned int> m_normalIndices;
         Matrix<4,4> m_ModelMat = Matrix<4,4>::IdentityMatrix();
+        float m_materialSpecularHighlights;
+        Vector<3> m_materialAmbientColour;
+        Vector<3> m_materialDiffuseColour;
+        Vector<3> m_materialSpecularColour;
+        Vector<3> m_materialEmissiveColour;
+        float m_materialOpticalDensity;
+        float m_materialDissolve;
+        int m_materialIlluminationModel;
+        std::string m_materialAmbientTexture;
+        std::string m_materialDiffuseTexture;
+        std::string m_materialSpecularTexture;
+        std::string m_materialEmissiveTexture;
 };

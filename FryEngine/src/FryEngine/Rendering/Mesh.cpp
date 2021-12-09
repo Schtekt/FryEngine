@@ -156,7 +156,8 @@ void Mesh::ReadFromObj(const std::string& path)
 {
     std::ifstream myfile(path);
     std::string line;
-    char command;
+    std::string command;
+    std::string tmpMtlPath;
     char commandTwo;
     float x;
     float y;
@@ -177,27 +178,25 @@ void Mesh::ReadFromObj(const std::string& path)
         {
             std::stringstream ss(line);
             ss >> command;
-            if (command == 'v')
+            if (command[0] == 'v')
             {
-                ss >> commandTwo;
-                if (commandTwo == 't')
+                if (command[1] == 't')
                 {
                     ss >> u >> v;
                     tmpUvCoords.push_back({ u,v });
                 }
-                else if (commandTwo == 'n')
+                else if (command[1] == 'n')
                 {
                     ss >> x >> y >> z;
                     tmpNormals.push_back({ x,y,z });
                 }
-                else 
-                { 
-                    ss.unget();
+                else
+                {
                     ss >> x >> y >> z;
                     tmpVertices.push_back({ x,y,z });
                 }
             }
-            else if (command == 'f')
+            else if (command[0] == 'f')
             {
                 for (int index = 0; index < 3; index++)
                 {
@@ -243,7 +242,11 @@ void Mesh::ReadFromObj(const std::string& path)
                     }
                 }
             }
-            else if (command == '#' || command == 0)
+            else if (command == "mtllib")
+            {
+                ss >> tmpMtlPath;
+            }
+            else if (command[0] == '#' || command[0] == 0)
             {
                 // If '#' or '/0' is encountered the file continues to run.
             }
@@ -257,7 +260,13 @@ void Mesh::ReadFromObj(const std::string& path)
                 isFileFormatCorrect = false;
                 break;
             }
-            command = 0;
+            command = "";
+        }
+        if (tmpMtlPath != "")
+        {
+            std::string dir = path.substr(0, path.rfind('/') + 1);
+            dir.insert(dir.size(), tmpMtlPath);
+            ReadFromMTL(dir);
         }
         if (isFileFormatCorrect)
         {
@@ -278,4 +287,112 @@ void Mesh::ReadFromObj(const std::string& path)
     {
         std::cout << "File did not open" << std::endl;
     }
+}
+
+void Mesh::ReadFromMTL(const std::string& path) 
+{
+    std::ifstream myfile(path);
+    std::string line;
+    std::string command;
+    bool isFileFormatCorrect = true;
+    float tmpSpecularHighlights = 0.f; // Ns
+    Vector<3> tmpAmbientColour; // Ka
+    Vector<3> tmpDiffuseColour; // Kd
+    Vector<3> tmpSpecularColour; // Ks
+    Vector<3> tmpEmissiveColour; // Ke
+    float tmpOpticalDensity = 0.f; // Ni
+    float tmpDissolve = 0.f; // d
+    int tmpIlluminationModel = 0; // illum
+    std::string tmpAmbientTexture; // map_Ka
+    std::string tmpDiffuseTexture; // map_Kd
+    std::string tmpSpecularTexture; // map_Ks
+    std::string tmpEmissiveTexture; // map_Ke
+    if (myfile.is_open())
+    {
+        while (std::getline(myfile, line))
+        {
+            std::stringstream ss(line);
+            ss >> command;
+            if (command[0] == 'N')
+            {
+                if (command[1] == 's')
+                {
+                    ss >> tmpSpecularHighlights;
+                }
+                else if (command[1] == 'i')
+                {
+                    ss >> tmpOpticalDensity;
+                }
+
+            }
+            else if (command[0] == 'K')
+            {
+                if (command[1] == 'a')
+                {
+                    ss >> tmpAmbientColour.nums[0] >> tmpAmbientColour.nums[1] >> tmpAmbientColour[2];
+
+                }
+                else if (command[1] == 'd')
+                {
+                    ss >> tmpDiffuseColour[0] >> tmpDiffuseColour[1] >> tmpDiffuseColour[2];
+
+                }
+                else if (command[1] == 's')
+                {
+                    ss >> tmpSpecularColour[0] >> tmpSpecularColour[1] >> tmpSpecularColour[2];
+
+                }
+                else if (command[1] == 'e')
+                {
+                    ss >> tmpEmissiveColour[0] >> tmpEmissiveColour[1] >> tmpEmissiveColour[2];
+
+                }
+            }
+            else if (command[0] == 'd')
+            {
+                ss >> tmpDissolve;
+            }
+            else if ( command == "illum")
+            {
+                ss >> tmpIlluminationModel;
+            }
+            else if (command == "map_Ka")
+            {
+                ss >> tmpAmbientTexture;
+            }
+            else if (command == "map_Kd")
+            {
+                ss >> tmpDiffuseTexture;
+            }
+            else if (command == "map_Ks")
+            {
+                ss >> tmpSpecularTexture;
+            }
+            else if (command == "map_Ke")
+            {
+                ss >> tmpEmissiveTexture;
+            }
+        }
+        if (isFileFormatCorrect)
+        {
+            m_materialSpecularHighlights = tmpSpecularHighlights;
+            m_materialAmbientColour = tmpAmbientColour;
+            m_materialDiffuseColour = tmpDiffuseColour;
+            m_materialSpecularColour = tmpSpecularColour;
+            m_materialEmissiveColour = tmpEmissiveColour;
+            m_materialOpticalDensity = tmpOpticalDensity;
+            m_materialDissolve = tmpDissolve;
+            m_materialIlluminationModel = tmpIlluminationModel;
+            m_materialAmbientTexture = tmpAmbientTexture;
+            m_materialDiffuseTexture = tmpDiffuseTexture;
+            m_materialSpecularTexture = tmpSpecularTexture;
+            m_materialEmissiveTexture = tmpEmissiveTexture;
+        }
+        else
+        {
+            std::cout << "File could not be read" << std::endl;
+        }
+        myfile.close();
+    }
+
 }
