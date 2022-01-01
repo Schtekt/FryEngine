@@ -22,77 +22,11 @@ class MyGame : public FryEngine::Game
         {
             m_win.Init();
 
-            std::vector<Vertex> vertices;
-            // Box.
-            vertices.push_back({-0.5, -0.5, -0.5, 1.0});
-            vertices.push_back({-0.5, 0.5, -0.5, 1.0});
-            vertices.push_back({0.5,  0.5, -0.5, 1.0});
-            vertices.push_back({0.5, -0.5, -0.5, 1.0});
-            vertices.push_back({0.5,  0.5, 0.5, 1.0});
-            vertices.push_back({0.5, -0.5, 0.5, 1.0});
-            vertices.push_back({-0.5, 0.5, 0.5, 1.0});
-            vertices.push_back({-0.5, -0.5, 0.5, 1.0});
-
-            std::vector<unsigned int> vertexIndices;
-
-            // South
-            vertexIndices.push_back(0);
-            vertexIndices.push_back(1);
-            vertexIndices.push_back(2);
             
-            vertexIndices.push_back(0);
-            vertexIndices.push_back(2);
-            vertexIndices.push_back(3);
-            
-            // East
-            vertexIndices.push_back(3);
-            vertexIndices.push_back(2);
-            vertexIndices.push_back(4);
-            
-            vertexIndices.push_back(3);
-            vertexIndices.push_back(4);
-            vertexIndices.push_back(5);
-            
-            // North
-            vertexIndices.push_back(5);
-            vertexIndices.push_back(4);
-            vertexIndices.push_back(6);
-            
-            vertexIndices.push_back(5);
-            vertexIndices.push_back(6);
-            vertexIndices.push_back(7);
-            
-            // West
-            vertexIndices.push_back(7);
-            vertexIndices.push_back(6);
-            vertexIndices.push_back(1);
-            
-            vertexIndices.push_back(7);
-            vertexIndices.push_back(1);
-            vertexIndices.push_back(0);
-            
-            // Top
-            vertexIndices.push_back(1);
-            vertexIndices.push_back(6);
-            vertexIndices.push_back(4);
-            
-            vertexIndices.push_back(1);
-            vertexIndices.push_back(4);
-            vertexIndices.push_back(2);
-            
-            // Bottom
-            vertexIndices.push_back(5);
-            vertexIndices.push_back(7);
-            vertexIndices.push_back(0);
-            
-            vertexIndices.push_back(5);
-            vertexIndices.push_back(0);
-            vertexIndices.push_back(3);
             Entity* CubeEnt = m_entities.emplace_back(m_ecs.CreateEntity());
 
             Mesh* mesh = CubeEnt->AddComponent<Mesh>();
-            mesh->SetVertices(vertices, vertexIndices);
-
+            mesh->ReadFromObj("../Resources/dice.obj");
         }
 
         void OnUpdate(TimeDuration DT_ms)
@@ -138,6 +72,15 @@ class MyGame : public FryEngine::Game
                 0, 0, 1, 0,
                 0, 0, 0, 1
             };
+
+            //Matrix<4, 4> rotY
+            //{
+            //    cos(m_gameRuntime * rotSpeed), 0, sin(m_gameRuntime * rotSpeed), 0,
+            //    0, 1, 0,0,
+            //    -sin(m_gameRuntime * rotSpeed), 0, cos(m_gameRuntime * rotSpeed), 0,
+            //    0,0,0,1
+            //};
+
             m_entities[0]->GetComponent<Mesh>()->SetModelMatrix(rotZ * rotX);
 
             m_ecs.UpdateSystems(DT_ms, m_systems);
@@ -170,4 +113,5 @@ int main()
     _CrtSetDbgFlag ( _CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF );
     MyGame game;
     game.Run();
+    return 0; 
 }

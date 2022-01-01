@@ -2,6 +2,7 @@
 #include <memory.h>
 #include <math.h>
 #include <algorithm>
+#include <vector>
 
 RenderTarget::RenderTarget( unsigned int width, unsigned int height) : m_width(width), m_height(height)
 {
@@ -106,6 +107,38 @@ void RenderTarget::FillTri(int x1, int y1, int x2, int y2, int x3, int y3, uint3
     }
     
     fillTriInternal(x1,y1,x2,y2,x3,y3,color);
+}
+
+void RenderTarget::FillTexturedTri(int x1, int y1, float u1, float v1,
+                                   int x2, int y2, float u2, float v2,
+                                   int x3, int y3, float u3, float v3,
+                                   unsigned char* image, unsigned int imageWidth, unsigned int imageHeight)
+{
+    if(y1 > y3)
+    {
+        std::swap(y1, y3);
+        std::swap(x1, x3);
+        std::swap(u1, u3);
+        std::swap(v1, v3);
+    }
+
+    if(y1 > y2)
+    {
+        std::swap(y1, y2);
+        std::swap(x1, x2);
+        std::swap(u1, u2);
+        std::swap(v1, v2);
+    }
+
+    if(y2 > y3)
+    {
+        std::swap(y2, y3);
+        std::swap(x2, x3);
+        std::swap(u2, u3);
+        std::swap(v2, v3);
+    }
+    
+    textureTriInternal(x1,y1,u1,v1,x2,y2,u2,v2,x3,y3,u3,v3, image, imageWidth, imageHeight);
 }
 
 void RenderTarget::drawLineBresenham(int x1, int y1, int x2, int y2, uint32_t color)
@@ -365,9 +398,9 @@ void RenderTarget::fillTriInternal(int x1, int y1, int x2, int y2, int x3, int y
     }
 }
 
-void RenderTarget::textureTriInternal(int x1, int y1, int u1, int v1, 
-                                      int x2, int y2, int u2, int v2, 
-                                      int x3, int y3, int u3, int v3, 
+void RenderTarget::textureTriInternal(int x1, int y1, float u1, float v1, 
+                                      int x2, int y2, float u2, float v2, 
+                                      int x3, int y3, float u3, float v3, 
                                       unsigned char* image, unsigned int imageWidth, unsigned int imageHeight)
 {
     // Assume points are sorted such that y1 <= y2 <= y3
@@ -376,10 +409,10 @@ void RenderTarget::textureTriInternal(int x1, int y1, int u1, int v1,
     int dx2 = x3 - x1;
     int dy1 = y2 - y1;
     int dy2 = y3 - y1;
-    int du1 = u2 - u1;
-    int du2 = u3 - u1;
-    int dv1 = u2 - u1;
-    int dv2 = u3 - u1;
+    float du1 = u2 - u1;
+    float du2 = u3 - u1;
+    float dv1 = v2 - v1;
+    float dv2 = v3 - v1;
 
     int ax, bx;
 
@@ -395,11 +428,7 @@ void RenderTarget::textureTriInternal(int x1, int y1, int u1, int v1,
         invertedDy2 = 1.f / dy2;
     }
 
-    // limit y values
-    unsigned int yLow = std::min(std::max(0, y1), (int)m_height);
-    unsigned int yHigh = std::min(std::max(0, y2), (int)m_height);
-
-    for (int y = yLow; y < yHigh; y++)
+    for (int y = y1; y < y2; y++)
     {
         float t1 = (y - y1) * invertedDy1;
         float t2 = (y - y1) * invertedDy2;
@@ -420,17 +449,24 @@ void RenderTarget::textureTriInternal(int x1, int y1, int u1, int v1,
             std::swap(startV, endV);
         }
 
-        int limitedAx = std::min(std::max(0, ax), (int)m_width);
-        int limitedBx = std::min(std::max(0, bx), (int)m_width);
+        //int limitedAx = std::min(std::max(0, ax), (int)m_width);
+        //int limitedBx = std::min(std::max(0, bx), (int)m_width);
+
         float t_step = 1.0f / (float)(bx - ax);
-        float t = (limitedAx - ax) * t_step;
+        float t = 0;
 
         float tex_u, tex_v;
-        for (int x = limitedAx; x < limitedBx; x++)
+        for (int x = ax; x < bx; x++)
         {
-            tex_u = startU + t * endU;
-            tex_v = startV + t * endV;
-            unsigned char color = image[(int)tex_u + (int)tex_v * imageHeight];
+            tex_u = (1.0f - t) * startU + t * endU;
+            tex_v = (1.0f - t) * startV + t * endV;
+            //uint32_t color = ((uint8_t)(255 * tex_u) << 16) | (uint8_t)(255 * tex_v);
+            unsigned int tex_x = tex_u * (imageWidth - 1) + 0.5f;
+            unsigned int tex_y = (1 - tex_v) * (imageHeight - 1) + 0.5f;
+            unsigned int startPos = tex_x + tex_y * (imageWidth);
+            startPos *= 3;
+            uint32_t color = ((uint8_t)image[startPos] << 16) | ((uint8_t)image[startPos + 1] << 8) | (uint8_t)image[startPos + 2];
+            //uint32_t color = startPos / (imageWidth * imageHeight);
             SetPixelColor(x, y, color);
             t += t_step;
         }
@@ -440,6 +476,11 @@ void RenderTarget::textureTriInternal(int x1, int y1, int u1, int v1,
     dx2 = x2 - x3;
     dy1 = y1 - y3;
     dy2 = y2 - y3;
+
+    du1 = u1 - u3;
+    du2 = u2 - u3;
+    dv1 = v1 - v3;
+    dv2 = v2 - v3;
 
     invertedDy1 = 0;
     invertedDy2 = 0;
@@ -453,10 +494,7 @@ void RenderTarget::textureTriInternal(int x1, int y1, int u1, int v1,
         invertedDy2 = 1.f / dy2;
     }
 
-    yLow = std::min(std::max(0, y2), (int)m_height);
-    yHigh = std::min(std::max(0, y3), (int)m_height);
-
-    for (int y = yLow; y <= yHigh; y++)
+    for (int y = y2; y <= y3; y++)
     {
         float t1 = (y - y3) * invertedDy1;
         float t2 = (y - y3) * invertedDy2;
@@ -467,10 +505,10 @@ void RenderTarget::textureTriInternal(int x1, int y1, int u1, int v1,
         ax = std::min(std::max(0, ax), (int)m_width);
         bx = std::min(std::max(0, bx), (int)m_width);
 
-        float startU = u1 + du1 * t1;
-        float startV = v1 + dv1 * t1;
-        float endU = u1 + du2 * t2;
-        float endV = v1 + dv2 * t2;
+        float startU = u3 + du1 * t1;
+        float startV = v3 + dv1 * t1;
+        float endU = u3 + du2 * t2;
+        float endV = v3 + dv2 * t2;
 
         if (ax > bx)
         {
@@ -479,17 +517,19 @@ void RenderTarget::textureTriInternal(int x1, int y1, int u1, int v1,
             std::swap(startV, endV);
         }
 
-        int limitedAx = std::min(std::max(0, ax), (int)m_width);
-        int limitedBx = std::min(std::max(0, bx), (int)m_width);
         float t_step = 1.0f / (float)(bx - ax);
-        float t = (limitedAx - ax) * t_step;
+        float t = 0;
 
         float tex_u, tex_v;
-        for (int x = limitedAx; x < limitedBx; x++)
+        for (int x = ax; x < bx; x++)
         {
-            tex_u = startU + t * endU;
-            tex_v = startV + t * endV;
-            unsigned char color = image[(int)tex_u + (int)tex_v * imageHeight];
+            tex_u = (1.0f - t) * startU + t * endU;
+            tex_v = (1.0f - t) * startV + t * endV;
+            unsigned int tex_x = tex_u * (imageWidth - 1) + 0.5f;
+            unsigned int tex_y = (1 - tex_v) * (imageHeight - 1) + 0.5f;
+            unsigned int startPos = tex_x + tex_y * (imageWidth);
+            startPos *= 3;
+            uint32_t color = ((uint8_t)image[startPos] << 16) | ((uint8_t)image[startPos + 1] << 8) | (uint8_t)image[startPos + 2];
             SetPixelColor(x, y, color);
             t += t_step;
         }

@@ -23,7 +23,7 @@ void ImageLoader::LoadImage(const std::string& path)
 
 	if (m_pPixels == NULL)
 	{
-		std::cout << "ERROR: When loading the image, the program found an error, is the path correct?" << std::endl;
+		std::cout << "ERROR: When loading the image, the program found an error, is the path " << path << " correct?" << std::endl;
 	}
 }
 
