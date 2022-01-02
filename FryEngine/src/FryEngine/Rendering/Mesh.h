@@ -29,8 +29,8 @@ struct Vertex
 
 struct UVCoord
 {
-    float u;
-    float v;
+    float u = 0.0f;
+    float v = 0.0f;
 };
 
 struct Normal
@@ -43,6 +43,7 @@ class Mesh
     public:
         Mesh();
         Mesh(const std::vector<Vertex>& m_vertices, const std::vector<unsigned int>& m_vertexIndices);
+        ~Mesh();
         void Draw(const Matrix<4,4>& View, const Matrix<4,4>& perspective, RenderTarget& target, E_DrawFlags flag = E_DrawFlags::FILL) const;
         void SetVertices(const std::vector<Vertex>& vertices, const std::vector<unsigned int>& vertexIndices);
         void SetModelMatrix(const Matrix<4,4>& mat);
@@ -55,6 +56,9 @@ class Mesh
         const std::vector<unsigned int>& GetUVIndices() const;
         const Matrix<4,4>& GetModelMatrix() const;
         inline const std::string& GetdiffusePath() const {return m_materialDiffuseTexture;};
+        inline unsigned char* GetDiffuseTexture() const { return m_pDiffuseTexture; };
+        inline const unsigned int GetDiffuseTextureHeight() const { return m_diffuseTextureHeight; };
+        inline const unsigned int GetDiffuseTextureWidth() const { return m_diffuseTextureWidth; };
     private:
         bool processTri(Vertex triOutput[3], const unsigned int triIndices[3], 
                         const Matrix<4,4>& viewMat, const Matrix<4,4> perspectiveMat) const;
@@ -67,16 +71,19 @@ class Mesh
         std::vector<unsigned int> m_uvIndices;
         std::vector<unsigned int> m_normalIndices;
         Matrix<4,4> m_ModelMat = Matrix<4,4>::IdentityMatrix();
-        float m_materialSpecularHighlights;
+        float m_materialSpecularHighlights = 0.0f;
         Vector<3> m_materialAmbientColour;
         Vector<3> m_materialDiffuseColour;
         Vector<3> m_materialSpecularColour;
         Vector<3> m_materialEmissiveColour;
-        float m_materialOpticalDensity;
-        float m_materialDissolve;
-        int m_materialIlluminationModel;
-        std::string m_materialAmbientTexture;
-        std::string m_materialDiffuseTexture;
-        std::string m_materialSpecularTexture;
-        std::string m_materialEmissiveTexture;
+        float m_materialOpticalDensity = 0.0f;
+        float m_materialDissolve = 0.0f;
+        int m_materialIlluminationModel = 0;
+        std::string m_materialAmbientTexture = "";
+        std::string m_materialDiffuseTexture = "";
+        std::string m_materialSpecularTexture = "";
+        std::string m_materialEmissiveTexture = "";
+        unsigned char* m_pDiffuseTexture = nullptr;
+        int m_diffuseTextureWidth = 0;
+        int m_diffuseTextureHeight = 0;
 };

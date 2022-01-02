@@ -19,7 +19,7 @@ void TriCollector::SubmitMesh(const Mesh& mesh, const Camera* cam)
 
     size_t currSize = m_tris.size();
     m_tris.reserve(currSize + vertexIndicesToSubmit.size() / 3);
-    for(unsigned int i = 0; i < vertexIndicesToSubmit.size(); i += 3)
+    for(size_t i = 0; i < vertexIndicesToSubmit.size(); i += 3)
     {
         Triangle& tri = m_tris.emplace_back(verticesToSubmit[vertexIndicesToSubmit[i]], uvCoordinatesToSubmit[uvCoordinatesIndicesToSubmit[i]],
         verticesToSubmit[vertexIndicesToSubmit[i + 1]], uvCoordinatesToSubmit[uvCoordinatesIndicesToSubmit[i + 1]],
@@ -40,7 +40,7 @@ void TriCollector::SubmitMesh(const Mesh& mesh, const Camera* cam)
         tri.p2.coords = cam->GetProjectionMatrix() * tri.p2.coords;
         tri.p3.coords = cam->GetProjectionMatrix() * tri.p3.coords;
     }
-    m_entries.emplace_back(mesh.GetdiffusePath(), m_tris.size() - 1);
+    m_entries.emplace_back(mesh.GetDiffuseTexture(), mesh.GetDiffuseTextureWidth(), mesh.GetDiffuseTextureHeight(), m_tris.size() - 1);
 }
 
 void TriCollector::SortTris()
@@ -88,7 +88,7 @@ void TriCollector::Draw(RenderTarget& target)
             (int)triOutput[0].coords.nums[0], (int)triOutput[0].coords.nums[1], m_tris[i].uv1.u, m_tris[i].uv1.v,
             (int)triOutput[1].coords.nums[0], (int)triOutput[1].coords.nums[1], m_tris[i].uv2.u, m_tris[i].uv2.v,
             (int)triOutput[2].coords.nums[0], (int)triOutput[2].coords.nums[1], m_tris[i].uv3.u, m_tris[i].uv3.v,
-            m_entries[entryCount].tex.GetImage(), m_entries[entryCount].tex.GetWidth(), m_entries[entryCount].tex.GetHeight()
+            m_entries[entryCount].image, m_entries[entryCount].texWidth, m_entries[entryCount].texHeight
         );
         target.DrawTri
         (

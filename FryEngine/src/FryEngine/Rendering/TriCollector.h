@@ -28,8 +28,10 @@ struct Triangle
 
 struct MeshEntry
 {
-    inline MeshEntry(const std::string& path, unsigned int lastVertex): tex(path), endVertex(lastVertex){}
-    ImageLoader tex;
+    inline MeshEntry(unsigned char* path, int width, int height, unsigned int lastVertex): image(path), texWidth(width), texHeight(height), endVertex(lastVertex){}
+    unsigned char* const image;
+    int texWidth;
+    int texHeight;
     unsigned int endVertex;
 };
 

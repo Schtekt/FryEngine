@@ -3,12 +3,18 @@
 #include <iostream>
 #include <fstream>
 #include <sstream>
+#include "../ResourceManagement/ImageLoader.h"
 
 Mesh::Mesh(){}
 
 Mesh::Mesh(const std::vector<Vertex>& vertices, const std::vector<unsigned int>& vertexIndices) 
 : m_vertices(vertices), m_vertexIndices(vertexIndices)
 {
+}
+
+Mesh::~Mesh()
+{
+    delete[] m_pDiffuseTexture;
 }
 
 void Mesh::SetVertices(const std::vector<Vertex>& vertices, const std::vector<unsigned int>& vertexIndices)
@@ -398,6 +404,27 @@ void Mesh::ReadFromMTL(const std::string& path)
             m_materialAmbientTexture.insert(m_materialAmbientTexture.size(), tmpAmbientTexture);
             m_materialDiffuseTexture = dir;
             m_materialDiffuseTexture.insert(m_materialDiffuseTexture.size(), tmpDiffuseTexture);
+            
+            if (m_materialDiffuseTexture.size() > 0)
+            {
+                ImageLoader loader(m_materialDiffuseTexture);
+                m_diffuseTextureWidth = loader.GetWidth();
+                m_diffuseTextureHeight = loader.GetHeight();
+                size_t size = (size_t)m_diffuseTextureHeight * m_diffuseTextureWidth * 3;
+
+                delete[] m_pDiffuseTexture;
+                m_pDiffuseTexture = new unsigned char[size];
+                if (m_pDiffuseTexture)
+                {
+                    unsigned char* ptr = loader.GetImage();
+                    memset(m_pDiffuseTexture, 0, size);
+                    for (size_t i = 0; i < size; i++)
+                    {
+                        m_pDiffuseTexture[i] = ptr[i];
+                    }
+                }
+            }
+
             m_materialSpecularTexture = dir;
             m_materialSpecularTexture.insert(m_materialSpecularTexture.size(), tmpSpecularTexture);
             m_materialEmissiveTexture = dir;

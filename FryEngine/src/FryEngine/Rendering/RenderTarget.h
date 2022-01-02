@@ -35,13 +35,6 @@ class RenderTarget
                             int x2, int y2, float u2, float v2,
                             int x3, int y3, float u3, float v3,
                             unsigned char* image, unsigned int imageWidth, unsigned int imageHeight);
-    void TexturedTriangle(int x1, int y1, float u1, float v1, //float w1,
-        int x2, int y2, float u2, float v2, //float w2,
-        int x3, int y3, float u3, float v3, //float w3,
-        unsigned char* image, unsigned int imageWidth, unsigned int imageHeight);
-    void Comp(int x1, int y1, float u1, float v1,
-        int x2, int y2, float u2, float v2,
-        int x3, int y3, float u3, float v3);
 
     private:
     unsigned int m_width;

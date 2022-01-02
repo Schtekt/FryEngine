@@ -328,8 +328,8 @@ void RenderTarget::fillTriInternal(int x1, int y1, int x2, int y2, int x3, int y
 
     int ax, bx;
 
-    float axStep = 0;
-    float bxStep = 0;
+    float axStep = 0.0f;
+    float bxStep = 0.0f;
 
     if (dy1)
     {
@@ -344,10 +344,10 @@ void RenderTarget::fillTriInternal(int x1, int y1, int x2, int y2, int x3, int y
     unsigned int yLow = std::min(std::max(0, y1), (int)m_height);
     unsigned int yHigh = std::min(std::max(0, y2), (int)m_height);
 
-    for (int y = yLow; y < yHigh; y++)
+    for (unsigned int y = yLow; y < yHigh; y++)
     {
-        ax = x1 + axStep * (y - y1);
-        bx = x1 + bxStep * (y - y1);
+        ax = x1 +(int)(axStep * (y - y1));
+        bx = x1 + (int)(bxStep * (y - y1));
 
         ax = std::min(std::max(0, ax), (int)m_width);
         bx = std::min(std::max(0, bx), (int)m_width);
@@ -380,10 +380,10 @@ void RenderTarget::fillTriInternal(int x1, int y1, int x2, int y2, int x3, int y
     yLow = std::min(std::max(0, y2), (int)m_height);
     yHigh = std::min(std::max(0, y3), (int)m_height);
 
-    for (int y = yLow; y <= yHigh; y++)
+    for (unsigned int y = yLow; y <= yHigh; y++)
     {
-        ax = x3 + axStep * (y - y3);
-        bx = x3 + bxStep * (y - y3);
+        ax = x3 + (int)(axStep * (y - y3));
+        bx = x3 + (int)(bxStep * (y - y3));
 
         ax = std::min(std::max(0, ax), (int)m_width);
         bx = std::min(std::max(0, bx), (int)m_width);
@@ -433,8 +433,8 @@ void RenderTarget::textureTriInternal(int x1, int y1, float u1, float v1,
         float t1 = (y - y1) * invertedDy1;
         float t2 = (y - y1) * invertedDy2;
 
-        ax = x1 + dx1 * t1;
-        bx = x1 + dx2 * t2;
+        ax = x1 + (int)(dx1 * t1);
+        bx = x1 + (int)(dx2 * t2);
         
         float startU = u1 + du1 * t1;
         float startV = v1 + dv1 * t1;
@@ -461,8 +461,8 @@ void RenderTarget::textureTriInternal(int x1, int y1, float u1, float v1,
             tex_u = (1.0f - t) * startU + t * endU;
             tex_v = (1.0f - t) * startV + t * endV;
             //uint32_t color = ((uint8_t)(255 * tex_u) << 16) | (uint8_t)(255 * tex_v);
-            unsigned int tex_x = tex_u * (imageWidth - 1) + 0.5f;
-            unsigned int tex_y = (1 - tex_v) * (imageHeight - 1) + 0.5f;
+            unsigned int tex_x = (unsigned int)(tex_u * (imageWidth - 1) + 0.5f);
+            unsigned int tex_y = (unsigned int)((1 - tex_v) * (imageHeight - 1) + 0.5f);
             unsigned int startPos = tex_x + tex_y * (imageWidth);
             startPos *= 3;
             uint32_t color = ((uint8_t)image[startPos] << 16) | ((uint8_t)image[startPos + 1] << 8) | (uint8_t)image[startPos + 2];
@@ -499,8 +499,8 @@ void RenderTarget::textureTriInternal(int x1, int y1, float u1, float v1,
         float t1 = (y - y3) * invertedDy1;
         float t2 = (y - y3) * invertedDy2;
 
-        ax = x3 + dx1 * t1;
-        bx = x3 + dx2 * t2;
+        ax = x3 + (int)(dx1 * t1);
+        bx = x3 + (int)(dx2 * t2);
 
         ax = std::min(std::max(0, ax), (int)m_width);
         bx = std::min(std::max(0, bx), (int)m_width);
@@ -525,8 +525,8 @@ void RenderTarget::textureTriInternal(int x1, int y1, float u1, float v1,
         {
             tex_u = (1.0f - t) * startU + t * endU;
             tex_v = (1.0f - t) * startV + t * endV;
-            unsigned int tex_x = tex_u * (imageWidth - 1) + 0.5f;
-            unsigned int tex_y = (1 - tex_v) * (imageHeight - 1) + 0.5f;
+            unsigned int tex_x = (unsigned int)(tex_u * (imageWidth - 1) + 0.5f);
+            unsigned int tex_y = (unsigned int)((1 - tex_v) * (imageHeight - 1) + 0.5f);
             unsigned int startPos = tex_x + tex_y * (imageWidth);
             startPos *= 3;
             uint32_t color = ((uint8_t)image[startPos] << 16) | ((uint8_t)image[startPos + 1] << 8) | (uint8_t)image[startPos + 2];
