@@ -8,4 +8,4 @@ workspace "FryEngine"
     }
     
 include "FryEngine"
-include "FryApp"
+include "FlappyClone"
