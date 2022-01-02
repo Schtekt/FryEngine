@@ -2,6 +2,7 @@
 #include <memory.h>
 #include <math.h>
 #include <algorithm>
+#include <vector>
 
 RenderTarget::RenderTarget( unsigned int width, unsigned int height) : m_width(width), m_height(height)
 {
@@ -87,42 +88,57 @@ void RenderTarget::DrawTri(int x1, int y1, int x2, int y2, int x3, int y3, uint3
 
 void RenderTarget::FillTri(int x1, int y1, int x2, int y2, int x3, int y3, uint32_t color)
 {
-    // Sort the vertices in ascending order
-    if (y2 > y1)
+    if(y1 > y3)
     {
-        std::swap(y2, y1);
-        std::swap(x2, x1);
+        std::swap(y1, y3);
+        std::swap(x1, x3);
     }
 
-    if (y3 > y1)
+    if(y1 > y2)
     {
-        std::swap(y3, y1);
-        std::swap(x3, x1);
+        std::swap(y1, y2);
+        std::swap(x1, x2);
     }
 
-    if (y3 > y2)
+    if(y2 > y3)
     {
-        std::swap(y3, y2);
-        std::swap(x3, x2);
+        std::swap(y2, y3);
+        std::swap(x2, x3);
+    }
+    
+    fillTriInternal(x1,y1,x2,y2,x3,y3,color);
+}
+
+void RenderTarget::FillTexturedTri(int x1, int y1, float u1, float v1,
+                                   int x2, int y2, float u2, float v2,
+                                   int x3, int y3, float u3, float v3,
+                                   unsigned char* image, unsigned int imageWidth, unsigned int imageHeight)
+{
+    if(y1 > y3)
+    {
+        std::swap(y1, y3);
+        std::swap(x1, x3);
+        std::swap(u1, u3);
+        std::swap(v1, v3);
     }
 
-    if (y1 == y2 && y1 == y3)
+    if(y1 > y2)
     {
-        DrawLine(std::min(x1, std::min(x2, x3)), y1, std::max(x1, std::max(x2,x3)), y1, color);
-        return;
-    }
-    else if (y1 == y2)
-    {
-        fillTriInternal(x3, y3, x2, y2, x1, y1, color);
-        return;
+        std::swap(y1, y2);
+        std::swap(x1, x2);
+        std::swap(u1, u2);
+        std::swap(v1, v2);
     }
 
-    // calculate fourth vertex
-    int x4 = x1 + (((double)y2 - y1)/((double)y3 - y1))*((double)x3 - x1);
-    int y4 = y2;
-
-    fillTriInternal(x1, y1, x2, y2, x4, y4, color);
-    fillTriInternal(x3, y3, x2, y2, x4, y4, color);
+    if(y2 > y3)
+    {
+        std::swap(y2, y3);
+        std::swap(x2, x3);
+        std::swap(u2, u3);
+        std::swap(v2, v3);
+    }
+    
+    textureTriInternal(x1,y1,u1,v1,x2,y2,u2,v2,x3,y3,u3,v3, image, imageWidth, imageHeight);
 }
 
 void RenderTarget::drawLineBresenham(int x1, int y1, int x2, int y2, uint32_t color)
@@ -303,74 +319,214 @@ void SetupLineInfo(LineInfo & lineInfo, int x1, int y1, int x2, int y2)
 
 void RenderTarget::fillTriInternal(int x1, int y1, int x2, int y2, int x3, int y3, uint32_t color)
 {
-    LineInfo firstLine;
-    LineInfo secondLine;
+    // Assume points are sorted such that y1 <= y2 <= y3
 
-    SetupLineInfo(firstLine, x1, y1, x2, y2);
-    SetupLineInfo(secondLine, x1, y1, x3, y3);
+    int dx1 = x2 - x1;
+    int dx2 = x3 - x1;
+    int dy1 = y2 - y1;
+    int dy2 = y3 - y1;
 
-    int i = 1;
-    int j = 1;
+    int ax, bx;
 
-    while (i <= firstLine.dx && j <= secondLine.dx)
+    float axStep = 0.0f;
+    float bxStep = 0.0f;
+
+    if (dy1)
     {
-        int firstLineY = firstLine.y;
+        axStep = (float)dx1 / dy1;
+    }
+    if (dy2)
+    {
+        bxStep = (float)dx2 / dy2;
+    }
 
-        while (firstLineY == firstLine.y && i <= firstLine.dx)
+    // limit y values
+    unsigned int yLow = std::min(std::max(0, y1), (int)m_height);
+    unsigned int yHigh = std::min(std::max(0, y2), (int)m_height);
+
+    for (unsigned int y = yLow; y < yHigh; y++)
+    {
+        ax = x1 +(int)(axStep * (y - y1));
+        bx = x1 + (int)(bxStep * (y - y1));
+
+        ax = std::min(std::max(0, ax), (int)m_width);
+        bx = std::min(std::max(0, bx), (int)m_width);
+        if (ax > bx)
+            std::swap(ax, bx);
+
+        for (int x = ax; x < bx; x++)
         {
-            while (firstLine.e >= 0 && firstLineY == firstLine.y)
-            {
-                if (firstLine.changed)
-                {
-                    firstLine.x += firstLine.signX;
-                }
-                else
-                {
-                    firstLine.y += firstLine.signY;
-                }
-                firstLine.e -= 2 * firstLine.dx;
-            }
+            SetPixelColor(x, y, color);
+        }
+    }
 
-            if (firstLine.changed)
-            {
-                firstLine.y += firstLine.signY;
-            }
-            else
-            {
-                firstLine.x += firstLine.signX;
-            }
-            firstLine.e += 2 * firstLine.dy;
-            ++i;
+    dx1 = x1 - x3;
+    dx2 = x2 - x3;
+    dy1 = y1 - y3;
+    dy2 = y2 - y3;
+
+    axStep = 0;
+    bxStep = 0;
+
+    if (dy1)
+    {
+        axStep = (float)dx1 / dy1;
+    }
+    if (dy2)
+    {
+        bxStep = (float)dx2 / dy2;
+    }
+
+    yLow = std::min(std::max(0, y2), (int)m_height);
+    yHigh = std::min(std::max(0, y3), (int)m_height);
+
+    for (unsigned int y = yLow; y <= yHigh; y++)
+    {
+        ax = x3 + (int)(axStep * (y - y3));
+        bx = x3 + (int)(bxStep * (y - y3));
+
+        ax = std::min(std::max(0, ax), (int)m_width);
+        bx = std::min(std::max(0, bx), (int)m_width);
+
+        if (ax > bx)
+            std::swap(ax, bx);
+
+        for (int x = ax; x < bx; x++)
+        {
+            SetPixelColor(x, y, color);
+        }
+    }
+}
+
+void RenderTarget::textureTriInternal(int x1, int y1, float u1, float v1, 
+                                      int x2, int y2, float u2, float v2, 
+                                      int x3, int y3, float u3, float v3, 
+                                      unsigned char* image, unsigned int imageWidth, unsigned int imageHeight)
+{
+    // Assume points are sorted such that y1 <= y2 <= y3
+
+    int dx1 = x2 - x1;
+    int dx2 = x3 - x1;
+    int dy1 = y2 - y1;
+    int dy2 = y3 - y1;
+    float du1 = u2 - u1;
+    float du2 = u3 - u1;
+    float dv1 = v2 - v1;
+    float dv2 = v3 - v1;
+
+    int ax, bx;
+
+    float invertedDy1 = 0;
+    float invertedDy2 = 0;
+
+    if (dy1)
+    {
+        invertedDy1 = 1.f / dy1;
+    }
+    if (dy2)
+    {
+        invertedDy2 = 1.f / dy2;
+    }
+
+    for (int y = y1; y < y2; y++)
+    {
+        float t1 = (y - y1) * invertedDy1;
+        float t2 = (y - y1) * invertedDy2;
+
+        ax = x1 + (int)(dx1 * t1);
+        bx = x1 + (int)(dx2 * t2);
+        
+        float startU = u1 + du1 * t1;
+        float startV = v1 + dv1 * t1;
+        float endU = u1 + du2 * t2;
+        float endV = v1 + dv2 * t2;
+
+
+        if (ax > bx)
+        {
+            std::swap(ax, bx);
+            std::swap(startU, endU);
+            std::swap(startV, endV);
         }
 
-        int secondLineY = secondLine.y;
-        while (secondLineY == secondLine.y && j <= secondLine.dx)
-        {
-            while (secondLine.e >= 0 && secondLineY == secondLine.y)
-            {
-                if (secondLine.changed)
-                {
-                    secondLine.x += secondLine.signX;
-                }
-                else
-                {
-                    secondLine.y += secondLine.signY;
-                }
-                secondLine.e -= 2 * secondLine.dx;
-            }
+        float t_step = 1.0f / (float)(bx - ax);
+        float t = 0;
 
-            if (secondLine.changed)
-            {
-                secondLine.y += secondLine.signY;
-            }
-            else
-            {
-                secondLine.x += secondLine.signX;
-            }
-            secondLine.e += 2 * secondLine.dy;
-            ++j;
+        float tex_u, tex_v;
+        for (int x = ax; x < bx; x++)
+        {
+            tex_u = (1.0f - t) * startU + t * endU;
+            tex_v = (1.0f - t) * startV + t * endV;
+            unsigned int tex_x = (unsigned int)(tex_u * (imageWidth - 1) + 0.5f);
+            unsigned int tex_y = (unsigned int)((1 - tex_v) * (imageHeight - 1) + 0.5f);
+            unsigned int startPos = tex_x + tex_y * (imageWidth);
+            startPos *= 3;
+            uint32_t color = ((uint8_t)image[startPos] << 16) | ((uint8_t)image[startPos + 1] << 8) | (uint8_t)image[startPos + 2];
+            SetPixelColor(x, y, color);
+            t += t_step;
+        }
+    }
+
+    dx1 = x1 - x3;
+    dx2 = x2 - x3;
+    dy1 = y1 - y3;
+    dy2 = y2 - y3;
+
+    du1 = u1 - u3;
+    du2 = u2 - u3;
+    dv1 = v1 - v3;
+    dv2 = v2 - v3;
+
+    invertedDy1 = 0;
+    invertedDy2 = 0;
+
+    if (dy1)
+    {
+        invertedDy1 = 1.f / dy1;
+    }
+    if (dy2)
+    {
+        invertedDy2 = 1.f / dy2;
+    }
+
+    for (int y = y2; y <= y3; y++)
+    {
+        float t1 = (y - y3) * invertedDy1;
+        float t2 = (y - y3) * invertedDy2;
+
+        ax = x3 + (int)(dx1 * t1);
+        bx = x3 + (int)(dx2 * t2);
+
+        ax = std::min(std::max(0, ax), (int)m_width);
+        bx = std::min(std::max(0, bx), (int)m_width);
+
+        float startU = u3 + du1 * t1;
+        float startV = v3 + dv1 * t1;
+        float endU = u3 + du2 * t2;
+        float endV = v3 + dv2 * t2;
+
+        if (ax > bx)
+        {
+            std::swap(ax, bx);
+            std::swap(startU, endU);
+            std::swap(startV, endV);
         }
 
-        DrawLine(firstLine.x, firstLine.y, secondLine.x, secondLine.y, color);
+        float t_step = 1.0f / (float)(bx - ax);
+        float t = 0;
+
+        float tex_u, tex_v;
+        for (int x = ax; x < bx; x++)
+        {
+            tex_u = (1.0f - t) * startU + t * endU;
+            tex_v = (1.0f - t) * startV + t * endV;
+            unsigned int tex_x = (unsigned int)(tex_u * (imageWidth - 1) + 0.5f);
+            unsigned int tex_y = (unsigned int)((1 - tex_v) * (imageHeight - 1) + 0.5f);
+            unsigned int startPos = tex_x + tex_y * (imageWidth);
+            startPos *= 3;
+            uint32_t color = ((uint8_t)image[startPos] << 16) | ((uint8_t)image[startPos + 1] << 8) | (uint8_t)image[startPos + 2];
+            SetPixelColor(x, y, color);
+            t += t_step;
+        }
     }
 }
