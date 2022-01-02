@@ -9,7 +9,7 @@ Window::~Window()
     Release();
 }
 
-LRESULT CALLBACK WndProc(HWND hwnd, UINT msg , WPARAM wparam, LPARAM lparam)
+LRESULT CALLBACK WndProc(HWND hwnd, UINT msg, WPARAM wparam, LPARAM lparam)
 {
     switch (msg)
     {
@@ -91,7 +91,17 @@ bool Window::ProcessMessage()
 {
     MSG msg;
 
-    while(PeekMessage(&msg, NULL, 0, 0, PM_REMOVE) > 0)
+    while(PeekMessage(&msg, this->m_windowHandle, WM_KEYFIRST, WM_KEYLAST, PM_REMOVE))
+    {
+        updateKey(msg);
+    }
+
+    while (PeekMessage(&msg, this->m_windowHandle, WM_MOUSEFIRST, WM_MOUSELAST, PM_REMOVE))
+    {
+        updateMouse(msg);
+    }
+
+    while(PeekMessage(&msg, this->m_windowHandle, 0, 0, PM_REMOVE) > 0)
     {
         TranslateMessage(&msg);
         DispatchMessage(&msg);
@@ -135,4 +145,42 @@ size_t Window::GetWidth() const
 size_t Window::GetHeight() const
 {
     return m_height;
+}
+
+KeyboardState& Window::GetKeyboard()
+{
+    return m_keyboardState;
+}
+
+MouseState& Window::GetMouseState()
+{
+    return m_mouseState;
+}
+
+void Window::updateKey(const MSG& msg)
+{
+
+    m_keyboardState.SetKeyState(msg.wParam, msg.message == WM_KEYDOWN);
+}
+
+void Window::updateMouse(const MSG& msg)
+{
+    switch (msg.message)
+    {
+    case WM_LBUTTONDOWN:
+        m_mouseState.SetLeftButton(true);
+        break;
+    case WM_LBUTTONUP:
+        m_mouseState.SetLeftButton(false);
+        break;
+    case WM_RBUTTONDOWN:
+        m_mouseState.SetRightButton(true);
+        break;
+    case WM_RBUTTONUP:
+        m_mouseState.SetRightButton(false);
+        break;
+    case WM_MOUSEMOVE:
+        m_mouseState.SetMousePos(LOWORD(msg.lParam), HIWORD(msg.lParam));
+        break;
+    }
 }

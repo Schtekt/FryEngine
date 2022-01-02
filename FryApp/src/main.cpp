@@ -9,6 +9,7 @@
 #include "FryEngine/Rendering/Camera.h"
 #include "FryEngine/Rendering/TriCollector.h"
 #include "FryEngine/ECS/RenderSystem.h"
+#include "FryEngine/Input/KeyboardState.h"
 
 class MyGame : public FryEngine::Game
 {
@@ -31,7 +32,9 @@ class MyGame : public FryEngine::Game
 
         void OnUpdate(TimeDuration DT_ms)
         {
-            if(GetAsyncKeyState(VK_ESCAPE) || !m_win.ProcessMessage())
+            //m_keyboardState.UpdateKeyboard(DT_ms);
+
+            if(m_win.GetKeyboard().GetKeyState(VK_ESCAPE) || !m_win.ProcessMessage())
             {
                 CloseGame();
             }
