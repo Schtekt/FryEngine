@@ -1,0 +1,22 @@
+mtllib Pyramid.mtl
+
+v 0.500000 -0.500000 0.500000 # Bot right, north
+v -0.500000 -0.500000 0.500000 # Bot left, north
+v -0.500000 -0.500000 -0.500000 # Bot left, south
+v 0.500000 -0.500000 -0.500000 # Bot right, south
+v 0.000000 0.500000 0.000000 # Top middle, middle
+
+vt 0.000000 0.000000
+vt 0.500000 0.000000
+vt 0.000000 1.000000
+vt 0.500000 1.000000
+vt 1.000000 0.000000
+vt 1.000000 1.000000
+
+f 1/2 2/5 3/6 # Bot face
+f 1/2 3/5 4/6
+
+f 1/2 2/3 5/1 # North face
+f 3/2 4/3 5/1 # South face
+f 2/2 3/3 5/4 # Left face
+f 4/2 1/3 5/4 # Right face

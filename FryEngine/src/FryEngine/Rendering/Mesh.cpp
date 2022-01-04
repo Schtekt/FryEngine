@@ -207,7 +207,7 @@ void Mesh::ReadFromObj(const std::string& path)
                 else
                 {
                     ss >> x >> y >> z;
-                    tmpVertices.push_back({ x,y,z, 1.0f});
+                    tmpVertices.push_back({ x,y,z, 1.0f });
                 }
             }
             else if (command[0] == 'f')
