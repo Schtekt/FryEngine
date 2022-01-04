@@ -453,7 +453,7 @@ void RenderTarget::textureTriInternal(int x1, int y1, float u1, float v1,
         float t = 0;
 
         float tex_u, tex_v;
-        for (int x = ax; x < bx; x++)
+        for (int x = ax; x <= bx; x++)
         {
             tex_u = (1.0f - t) * startU + t * endU;
             tex_v = (1.0f - t) * startV + t * endV;
@@ -516,7 +516,7 @@ void RenderTarget::textureTriInternal(int x1, int y1, float u1, float v1,
         float t = 0;
 
         float tex_u, tex_v;
-        for (int x = ax; x < bx; x++)
+        for (int x = ax; x <= bx; x++)
         {
             tex_u = (1.0f - t) * startU + t * endU;
             tex_v = (1.0f - t) * startV + t * endV;

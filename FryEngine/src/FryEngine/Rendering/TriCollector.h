@@ -37,14 +37,19 @@ struct MeshEntry
 
 class TriCollector
 {
-    public:
+public:
     TriCollector();
     void SubmitMesh(const Mesh& mesh, const Camera* cam);
     void SortTris();
-    void Draw(RenderTarget& target);
+    void Draw(RenderTarget& target, E_DrawFlags flags = E_DrawFlags::FILL);
     void Clear();
 
-    private:
+private:
+    void drawWithTexture(RenderTarget& target);
+    void drawWireframe(RenderTarget& target);
+    void drawWithTextureAndWireframe(RenderTarget& target);
+
+private:
     std::vector<Triangle> m_tris;
     std::vector<MeshEntry> m_entries;
 };

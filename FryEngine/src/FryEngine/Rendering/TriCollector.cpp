@@ -52,13 +52,35 @@ void TriCollector::SortTris()
     });
 }
 
-void TriCollector::Draw(RenderTarget& target)
+void TriCollector::Draw(RenderTarget& target, E_DrawFlags flags)
+{
+    switch (flags)
+    {
+    case (E_DrawFlags::WIREFRAME | E_DrawFlags::FILL):
+        drawWithTextureAndWireframe(target);
+        break;
+    case (E_DrawFlags::FILL):
+        drawWithTexture(target);
+        break;
+    case (E_DrawFlags::WIREFRAME):
+        drawWireframe(target);
+        break;
+    }
+}
+
+void TriCollector::Clear()
+{
+    m_tris.clear();
+    m_entries.clear();
+}
+
+void TriCollector::drawWithTexture(RenderTarget& target)
 {
     Vertex triOutput[3];
     unsigned int entryCount = 0;
-    for(unsigned int i = 0; i < m_tris.size(); ++i)
+    for (unsigned int i = 0; i < m_tris.size(); ++i)
     {
-        if(i > m_entries[entryCount].endVertex)
+        if (i > m_entries[entryCount].endVertex)
         {
             entryCount++;
         }
@@ -83,6 +105,7 @@ void TriCollector::Draw(RenderTarget& target)
         triOutput[1].coords[1] = triOutput[1].coords[1] * 0.5 * target.GetHeight();
         triOutput[2].coords[0] = triOutput[2].coords[0] * 0.5 * target.GetWidth();
         triOutput[2].coords[1] = triOutput[2].coords[1] * 0.5 * target.GetHeight();
+
         target.FillTexturedTri
         (
             (int)triOutput[0].coords.nums[0], (int)triOutput[0].coords.nums[1], m_tris[i].uv1.u, m_tris[i].uv1.v,
@@ -90,6 +113,41 @@ void TriCollector::Draw(RenderTarget& target)
             (int)triOutput[2].coords.nums[0], (int)triOutput[2].coords.nums[1], m_tris[i].uv3.u, m_tris[i].uv3.v,
             m_entries[entryCount].image, m_entries[entryCount].texWidth, m_entries[entryCount].texHeight
         );
+    }
+}
+
+void TriCollector::drawWireframe(RenderTarget& target)
+{
+    Vertex triOutput[3];
+    unsigned int entryCount = 0;
+    for (unsigned int i = 0; i < m_tris.size(); ++i)
+    {
+        if (i > m_entries[entryCount].endVertex)
+        {
+            entryCount++;
+        }
+
+        // Projection
+        triOutput[0].coords = m_tris[i].p1.coords;
+        triOutput[1].coords = m_tris[i].p2.coords;
+        triOutput[2].coords = m_tris[i].p3.coords;
+
+        // move to the a "rendertarget" to the right and top.
+        triOutput[0].coords[0] = triOutput[0].coords[0] + 1;
+        triOutput[0].coords[1] = triOutput[0].coords[1] + 1;
+        triOutput[1].coords[0] = triOutput[1].coords[0] + 1;
+        triOutput[1].coords[1] = triOutput[1].coords[1] + 1;
+        triOutput[2].coords[0] = triOutput[2].coords[0] + 1;
+        triOutput[2].coords[1] = triOutput[2].coords[1] + 1;
+
+        // Scale triangle to match the size of the rendertarget.
+        triOutput[0].coords[0] = triOutput[0].coords[0] * 0.5 * target.GetWidth();
+        triOutput[0].coords[1] = triOutput[0].coords[1] * 0.5 * target.GetHeight();
+        triOutput[1].coords[0] = triOutput[1].coords[0] * 0.5 * target.GetWidth();
+        triOutput[1].coords[1] = triOutput[1].coords[1] * 0.5 * target.GetHeight();
+        triOutput[2].coords[0] = triOutput[2].coords[0] * 0.5 * target.GetWidth();
+        triOutput[2].coords[1] = triOutput[2].coords[1] * 0.5 * target.GetHeight();
+
         target.DrawTri
         (
             (int)triOutput[0].coords.nums[0], (int)triOutput[0].coords.nums[1],
@@ -100,8 +158,52 @@ void TriCollector::Draw(RenderTarget& target)
     }
 }
 
-void TriCollector::Clear()
+void TriCollector::drawWithTextureAndWireframe(RenderTarget& target)
 {
-    m_tris.clear();
-    m_entries.clear();
+    Vertex triOutput[3];
+    unsigned int entryCount = 0;
+    for (unsigned int i = 0; i < m_tris.size(); ++i)
+    {
+        if (i > m_entries[entryCount].endVertex)
+        {
+            entryCount++;
+        }
+
+        // Projection
+        triOutput[0].coords = m_tris[i].p1.coords;
+        triOutput[1].coords = m_tris[i].p2.coords;
+        triOutput[2].coords = m_tris[i].p3.coords;
+
+        // move to the a "rendertarget" to the right and top.
+        triOutput[0].coords[0] = triOutput[0].coords[0] + 1;
+        triOutput[0].coords[1] = triOutput[0].coords[1] + 1;
+        triOutput[1].coords[0] = triOutput[1].coords[0] + 1;
+        triOutput[1].coords[1] = triOutput[1].coords[1] + 1;
+        triOutput[2].coords[0] = triOutput[2].coords[0] + 1;
+        triOutput[2].coords[1] = triOutput[2].coords[1] + 1;
+
+        // Scale triangle to match the size of the rendertarget.
+        triOutput[0].coords[0] = triOutput[0].coords[0] * 0.5 * target.GetWidth();
+        triOutput[0].coords[1] = triOutput[0].coords[1] * 0.5 * target.GetHeight();
+        triOutput[1].coords[0] = triOutput[1].coords[0] * 0.5 * target.GetWidth();
+        triOutput[1].coords[1] = triOutput[1].coords[1] * 0.5 * target.GetHeight();
+        triOutput[2].coords[0] = triOutput[2].coords[0] * 0.5 * target.GetWidth();
+        triOutput[2].coords[1] = triOutput[2].coords[1] * 0.5 * target.GetHeight();
+
+        target.FillTexturedTri
+        (
+            (int)triOutput[0].coords.nums[0], (int)triOutput[0].coords.nums[1], m_tris[i].uv1.u, m_tris[i].uv1.v,
+            (int)triOutput[1].coords.nums[0], (int)triOutput[1].coords.nums[1], m_tris[i].uv2.u, m_tris[i].uv2.v,
+            (int)triOutput[2].coords.nums[0], (int)triOutput[2].coords.nums[1], m_tris[i].uv3.u, m_tris[i].uv3.v,
+            m_entries[entryCount].image, m_entries[entryCount].texWidth, m_entries[entryCount].texHeight
+        );
+
+        target.DrawTri
+        (
+            (int)triOutput[0].coords.nums[0], (int)triOutput[0].coords.nums[1],
+            (int)triOutput[1].coords.nums[0], (int)triOutput[1].coords.nums[1],
+            (int)triOutput[2].coords.nums[0], (int)triOutput[2].coords.nums[1],
+            (255 << 16)
+        );
+    }
 }
